@@ -126,8 +126,14 @@ export default function Test() {
                     ) : (
                         <div style={{ animation: 'fadeIn 0.3s' }}>
                             {feedback === 'correct' ? (
-                                <div style={{ color: 'var(--success)', fontWeight: 'bold', marginBottom: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                    <CheckCircle /> Correct!
+                                <div style={{ color: 'var(--success)', fontWeight: 'bold', marginBottom: '1rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                                        <CheckCircle /> Correct!
+                                    </div>
+                                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 'normal' }}>
+                                        Answer: {currentWord.answer_list[0]}
+                                        {currentWord.answer_list.length > 1 && <span style={{ fontSize: '0.9em', opacity: 0.8 }}> (also: {currentWord.answer_list.slice(1).join(', ')})</span>}
+                                    </p>
                                 </div>
                             ) : (
                                 <div style={{ marginBottom: '1rem' }}>
