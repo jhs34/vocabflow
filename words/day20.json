@@ -1,0 +1,202 @@
+[
+    {
+        "id": "761",
+        "word": "abolish",
+        "raw_meaning": "폐지하다"
+    },
+    {
+        "id": "762",
+        "word": "assure",
+        "raw_meaning": "보증하다, 확실하게 하다"
+    },
+    {
+        "id": "763",
+        "word": "form",
+        "raw_meaning": "형태, 종류, 형성하다"
+    },
+    {
+        "id": "764",
+        "word": "gender",
+        "raw_meaning": "성(性), 성별"
+    },
+    {
+        "id": "765",
+        "word": "innovation",
+        "raw_meaning": "혁신"
+    },
+    {
+        "id": "766",
+        "word": "opponent",
+        "raw_meaning": "반대자, 상대, 반대하는"
+    },
+    {
+        "id": "767",
+        "word": "present",
+        "raw_meaning": "현재의, 현재, 선물, 제출하다, 나타내다"
+    },
+    {
+        "id": "768",
+        "word": "fertile",
+        "raw_meaning": "비옥한, 기름진"
+    },
+    {
+        "id": "769",
+        "word": "emperor",
+        "raw_meaning": "황제"
+    },
+    {
+        "id": "770",
+        "word": "dwell",
+        "raw_meaning": "살다, 거주하다"
+    },
+    {
+        "id": "771",
+        "word": "chore",
+        "raw_meaning": "집안일, 허드렛일"
+    },
+    {
+        "id": "772",
+        "word": "grateful",
+        "raw_meaning": "고마워하는, 감사하는"
+    },
+    {
+        "id": "773",
+        "word": "fossil",
+        "raw_meaning": "화석"
+    },
+    {
+        "id": "774",
+        "word": "glitter",
+        "raw_meaning": "반짝이다, 반짝임"
+    },
+    {
+        "id": "775",
+        "word": "miserable",
+        "raw_meaning": "비참한, 불쌍한"
+    },
+    {
+        "id": "776",
+        "word": "portray",
+        "raw_meaning": "묘사하다, 설명하다, 초상을 그리다"
+    },
+    {
+        "id": "777",
+        "word": "protein",
+        "raw_meaning": "단백질"
+    },
+    {
+        "id": "778",
+        "word": "backward",
+        "raw_meaning": "후방에, 뒤쪽으로, 거꾸로"
+    },
+    {
+        "id": "779",
+        "word": "translate",
+        "raw_meaning": "번역하다, 옮기다"
+    },
+    {
+        "id": "780",
+        "word": "refresh",
+        "raw_meaning": "상쾌하게 하다, 새롭게 하다"
+    },
+    {
+        "id": "781",
+        "word": "tissue",
+        "raw_meaning": "(생물의 근육·신경 등의) 조직"
+    },
+    {
+        "id": "782",
+        "word": "lord",
+        "raw_meaning": "군주"
+    },
+    {
+        "id": "783",
+        "word": "remove",
+        "raw_meaning": "제거하다"
+    },
+    {
+        "id": "784",
+        "word": "scan",
+        "raw_meaning": "정밀 검사하다, 유심히 쳐다보다"
+    },
+    {
+        "id": "785",
+        "word": "pottery",
+        "raw_meaning": "도자기, 도예"
+    },
+    {
+        "id": "786",
+        "word": "layer",
+        "raw_meaning": "층, 겹"
+    },
+    {
+        "id": "787",
+        "word": "property",
+        "raw_meaning": "재산, 소유물, 부동산"
+    },
+    {
+        "id": "788",
+        "word": "justify",
+        "raw_meaning": "정당화하다"
+    },
+    {
+        "id": "789",
+        "word": "polish",
+        "raw_meaning": "닦다, 윤을 내다, (문장 등을) 다듬다"
+    },
+    {
+        "id": "790",
+        "word": "flavor",
+        "raw_meaning": "맛, 맛을 내다"
+    },
+    {
+        "id": "791",
+        "word": "ceremony",
+        "raw_meaning": "의식, 식, 의례"
+    },
+    {
+        "id": "792",
+        "word": "relate",
+        "raw_meaning": "관련시키다, 관련이 있다"
+    },
+    {
+        "id": "793",
+        "word": "strive",
+        "raw_meaning": "노력하다, 애쓰다, 투쟁하다"
+    },
+    {
+        "id": "794",
+        "word": "radiant",
+        "raw_meaning": "빛나는, 아주 밝은"
+    },
+    {
+        "id": "795",
+        "word": "exclaim",
+        "raw_meaning": "(감탄하며) 외치다"
+    },
+    {
+        "id": "796",
+        "word": "asset",
+        "raw_meaning": "자산, 재산"
+    },
+    {
+        "id": "797",
+        "word": "decay",
+        "raw_meaning": "부패하다, 쇠퇴하다, 부패, 쇠퇴"
+    },
+    {
+        "id": "798",
+        "word": "administer",
+        "raw_meaning": "관리[운영]하다, 집행하다, 주다"
+    },
+    {
+        "id": "799",
+        "word": "wage",
+        "raw_meaning": "임금, 급료"
+    },
+    {
+        "id": "800",
+        "word": "subscribe",
+        "raw_meaning": "구독하다, 가입하다"
+    }
+]
