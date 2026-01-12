@@ -136,13 +136,13 @@ export default function Test() {
                 </span>
             </div>
 
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
                 <motion.div
                     key={currentIndex}
                     initial={{ opacity: 0, x: 50, filter: 'blur(10px)' }}
                     animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
                     exit={{ opacity: 0, x: -50, filter: 'blur(10px)' }}
-                    transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                     className="glass-panel-gradient"
                     style={{ padding: '3rem 2rem', textAlign: 'center', position: 'relative' }}
                     onAnimationComplete={() => inputRef.current?.focus()}

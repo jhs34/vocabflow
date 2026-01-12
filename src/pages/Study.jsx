@@ -36,7 +36,16 @@ function Flashcard({ word }) {
                     justifyContent: 'center',
                     overflow: 'hidden'
                 }}>
-                    <h2 className="text-gradient-multi" style={{ fontSize: '3.5rem', fontWeight: '800', margin: 0 }}>{word.word}</h2>
+                    <h2 className="text-gradient-multi" style={{
+                        fontSize: 'clamp(2.5rem, 8vw, 3.5rem)',
+                        fontWeight: '800',
+                        margin: 0,
+                        textAlign: 'center',
+                        wordBreak: 'break-word',
+                        overflowWrap: 'anywhere',
+                        lineHeight: 1.1,
+                        padding: '0 1rem'
+                    }}>{word.word}</h2>
                     <p style={{ marginTop: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Tap to see meaning</p>
                 </div>
 
@@ -53,7 +62,16 @@ function Flashcard({ word }) {
                     justifyContent: 'center',
                     overflow: 'hidden'
                 }}>
-                    <h3 style={{ fontSize: '1.8rem', fontWeight: 'bold', color: '#fff', textAlign: 'center', padding: '0 1.5rem', lineHeight: '1.4' }}>{word.raw_meaning}</h3>
+                    <h3 style={{
+                        fontSize: '1.8rem',
+                        fontWeight: 'bold',
+                        color: '#fff',
+                        textAlign: 'center',
+                        padding: '0 1.5rem',
+                        lineHeight: '1.4',
+                        wordBreak: 'keep-all',
+                        overflowWrap: 'anywhere'
+                    }}>{word.raw_meaning}</h3>
                     <div style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                         {word.answer_list.map((ans, idx) => (
                             <span key={idx} style={{
