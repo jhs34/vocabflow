@@ -1,0 +1,202 @@
+[
+    {
+        "id": "41",
+        "word": "emotion",
+        "raw_meaning": "감정"
+    },
+    {
+        "id": "42",
+        "word": "amaze",
+        "raw_meaning": "놀라게 하다"
+    },
+    {
+        "id": "43",
+        "word": "reduce",
+        "raw_meaning": "줄이다, 낮추다"
+    },
+    {
+        "id": "44",
+        "word": "discover",
+        "raw_meaning": "발견하다"
+    },
+    {
+        "id": "45",
+        "word": "decide",
+        "raw_meaning": "결심하다, 결정하다"
+    },
+    {
+        "id": "46",
+        "word": "benefit",
+        "raw_meaning": "이익, 이익이 되다"
+    },
+    {
+        "id": "47",
+        "word": "affect",
+        "raw_meaning": "영향을 미치다, ~인 체하다"
+    },
+    {
+        "id": "48",
+        "word": "level",
+        "raw_meaning": "수준, 수평, 수평의, 평평하게 하다"
+    },
+    {
+        "id": "49",
+        "word": "chemistry",
+        "raw_meaning": "화학, 교감(交感)"
+    },
+    {
+        "id": "50",
+        "word": "immediate",
+        "raw_meaning": "즉각적인, 가까이에 있는"
+    },
+    {
+        "id": "51",
+        "word": "thus",
+        "raw_meaning": "그러므로, 따라서"
+    },
+    {
+        "id": "52",
+        "word": "proper",
+        "raw_meaning": "적절한, 알맞은"
+    },
+    {
+        "id": "53",
+        "word": "performance",
+        "raw_meaning": "공연, 성적, 성과"
+    },
+    {
+        "id": "54",
+        "word": "essence",
+        "raw_meaning": "(사물의) 본질, 정수(精髓)"
+    },
+    {
+        "id": "55",
+        "word": "economic",
+        "raw_meaning": "경제의, 경제학의"
+    },
+    {
+        "id": "56",
+        "word": "cell",
+        "raw_meaning": "세포, 작은 방, 독방"
+    },
+    {
+        "id": "57",
+        "word": "focus",
+        "raw_meaning": "초점, 초점을 맞추다, 집중하다"
+    },
+    {
+        "id": "58",
+        "word": "issue",
+        "raw_meaning": "화제, 문제, 발행(물), 발행하다"
+    },
+    {
+        "id": "59",
+        "word": "participate",
+        "raw_meaning": "참여하다, 참가하다 (in)"
+    },
+    {
+        "id": "60",
+        "word": "demand",
+        "raw_meaning": "요구하다, 수요"
+    },
+    {
+        "id": "61",
+        "word": "occur",
+        "raw_meaning": "(사건이) 일어나다, 발생하다"
+    },
+    {
+        "id": "62",
+        "word": "complex",
+        "raw_meaning": "복잡한, 복합체"
+    },
+    {
+        "id": "63",
+        "word": "define",
+        "raw_meaning": "정의하다, 한계 짓다, 한정하다"
+    },
+    {
+        "id": "64",
+        "word": "proud",
+        "raw_meaning": "자랑스러워하는, 자만하는"
+    },
+    {
+        "id": "65",
+        "word": "aware",
+        "raw_meaning": "인지하는, 알고 있는"
+    },
+    {
+        "id": "66",
+        "word": "contact",
+        "raw_meaning": "접촉, 접촉하다"
+    },
+    {
+        "id": "67",
+        "word": "profession",
+        "raw_meaning": "전문직, 직종"
+    },
+    {
+        "id": "68",
+        "word": "detail",
+        "raw_meaning": "세부적인 것, 상술하다"
+    },
+    {
+        "id": "69",
+        "word": "approach",
+        "raw_meaning": "접근하다, 접근, 접근법"
+    },
+    {
+        "id": "70",
+        "word": "career",
+        "raw_meaning": "직업, 경력"
+    },
+    {
+        "id": "71",
+        "word": "package",
+        "raw_meaning": "꾸러미, 포장, 포장하다"
+    },
+    {
+        "id": "72",
+        "word": "disappear",
+        "raw_meaning": "사라지다"
+    },
+    {
+        "id": "73",
+        "word": "novel",
+        "raw_meaning": "(장편) 소설, 참신한"
+    },
+    {
+        "id": "74",
+        "word": "secure",
+        "raw_meaning": "안전한, 안전하게 하다, 확보하다"
+    },
+    {
+        "id": "75",
+        "word": "function",
+        "raw_meaning": "기능, 기능하다, 작용하다"
+    },
+    {
+        "id": "76",
+        "word": "despite",
+        "raw_meaning": "~에도 불구하고"
+    },
+    {
+        "id": "77",
+        "word": "background",
+        "raw_meaning": "배경, 배경 지식, 이유"
+    },
+    {
+        "id": "78",
+        "word": "solution",
+        "raw_meaning": "해결, 해결책, 용액"
+    },
+    {
+        "id": "79",
+        "word": "generate",
+        "raw_meaning": "일으키다, 발생시키다"
+    },
+    {
+        "id": "80",
+        "word": "eventually",
+        "raw_meaning": "결국"
+    }
+]

@@ -1,0 +1,202 @@
+[
+    {
+        "id": "1",
+        "word": "provide",
+        "raw_meaning": "제공하다, 공급하다, 준비하다"
+    },
+    {
+        "id": "2",
+        "word": "develop",
+        "raw_meaning": "개발하다, 발달[발전]하다"
+    },
+    {
+        "id": "3",
+        "word": "cultural",
+        "raw_meaning": "문화의, 문화적인"
+    },
+    {
+        "id": "4",
+        "word": "inform",
+        "raw_meaning": "알리다, 통지하다"
+    },
+    {
+        "id": "5",
+        "word": "social",
+        "raw_meaning": "사회의, 사교적인"
+    },
+    {
+        "id": "6",
+        "word": "improve",
+        "raw_meaning": "향상시키다, 향상하다"
+    },
+    {
+        "id": "7",
+        "word": "individual",
+        "raw_meaning": "개인, 개인의, 개인적인"
+    },
+    {
+        "id": "8",
+        "word": "require",
+        "raw_meaning": "필요로 하다, 요구하다"
+    },
+    {
+        "id": "9",
+        "word": "volunteer",
+        "raw_meaning": "자원봉사, 지원자, 자원하다"
+    },
+    {
+        "id": "10",
+        "word": "behave",
+        "raw_meaning": "(예의 바르게) 행동하다"
+    },
+    {
+        "id": "11",
+        "word": "amount",
+        "raw_meaning": "총액, 총계, 액수, 양, 총계가 ~이 되다"
+    },
+    {
+        "id": "12",
+        "word": "relationship",
+        "raw_meaning": "관계"
+    },
+    {
+        "id": "13",
+        "word": "employ",
+        "raw_meaning": "고용하다, (기술 · 방법 등을) 쓰다"
+    },
+    {
+        "id": "14",
+        "word": "attitude",
+        "raw_meaning": "태도, 입장"
+    },
+    {
+        "id": "15",
+        "word": "research",
+        "raw_meaning": "연구, 연구하다, 조사하다"
+    },
+    {
+        "id": "16",
+        "word": "audience",
+        "raw_meaning": "청중, 관객"
+    },
+    {
+        "id": "17",
+        "word": "challenge",
+        "raw_meaning": "도전, 난제, 도전하다"
+    },
+    {
+        "id": "18",
+        "word": "influence",
+        "raw_meaning": "영향, 영향을 미치는 것[사람], 영향을 끼치다, 영향을 주다"
+    },
+    {
+        "id": "19",
+        "word": "material",
+        "raw_meaning": "자료, 재료, 물질"
+    },
+    {
+        "id": "20",
+        "word": "opportunity",
+        "raw_meaning": "기회"
+    },
+    {
+        "id": "21",
+        "word": "environment",
+        "raw_meaning": "환경"
+    },
+    {
+        "id": "22",
+        "word": "expense",
+        "raw_meaning": "비용, 지출"
+    },
+    {
+        "id": "23",
+        "word": "local",
+        "raw_meaning": "지방의, 지역의, 장소의"
+    },
+    {
+        "id": "24",
+        "word": "involve",
+        "raw_meaning": "포함하다, 관련되다, (사건 등에) 말려들게 하다"
+    },
+    {
+        "id": "25",
+        "word": "stress",
+        "raw_meaning": "스트레스, 강조, 강조하다, 압력을 주다"
+    },
+    {
+        "id": "26",
+        "word": "therefore",
+        "raw_meaning": "그러므로, 그 결과"
+    },
+    {
+        "id": "27",
+        "word": "contain",
+        "raw_meaning": "함유하다, 포함하다, 억제하다"
+    },
+    {
+        "id": "28",
+        "word": "average",
+        "raw_meaning": "평균, 평균의, 평균 ~이다"
+    },
+    {
+        "id": "29",
+        "word": "ride",
+        "raw_meaning": "(탈것을) 타다, 타기, 타고 가기"
+    },
+    {
+        "id": "30",
+        "word": "encourage",
+        "raw_meaning": "촉구하다, 격려하다"
+    },
+    {
+        "id": "31",
+        "word": "determine",
+        "raw_meaning": "결정하다, 결심하다"
+    },
+    {
+        "id": "32",
+        "word": "international",
+        "raw_meaning": "국제의, 국제적인"
+    },
+    {
+        "id": "33",
+        "word": "consume",
+        "raw_meaning": "소비하다, 먹다[마시다]"
+    },
+    {
+        "id": "34",
+        "word": "impress",
+        "raw_meaning": "깊은 인상을 주다, 감동시키다"
+    },
+    {
+        "id": "35",
+        "word": "object",
+        "raw_meaning": "물체, 목표, 반대하다"
+    },
+    {
+        "id": "36",
+        "word": "available",
+        "raw_meaning": "이용 가능한, 쓸모 있는"
+    },
+    {
+        "id": "37",
+        "word": "positive",
+        "raw_meaning": "긍정적인, 확신하는"
+    },
+    {
+        "id": "38",
+        "word": "recognize",
+        "raw_meaning": "인지하다, 인정하다"
+    },
+    {
+        "id": "39",
+        "word": "commodity",
+        "raw_meaning": "상품, 물품"
+    },
+    {
+        "id": "40",
+        "word": "comfort",
+        "raw_meaning": "편안하게 하다, 위로하다, 편안, 위로"
+    }
+]
