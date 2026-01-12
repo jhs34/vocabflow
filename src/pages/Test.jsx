@@ -148,7 +148,7 @@ export default function Test() {
                     onAnimationComplete={() => inputRef.current?.focus()}
                 >
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '1rem' }}>Translate this word:</p>
-                    <h2 className="text-gradient-multi" style={{ fontSize: '3rem', fontWeight: '800', marginBottom: '3rem' }}>{currentWord.word}</h2>
+                    <h2 className="text-gradient-multi" style={{ fontSize: 'clamp(2rem, 8vw, 3rem)', fontWeight: '800', marginBottom: '3rem', wordBreak: 'break-word', overflowWrap: 'anywhere', lineHeight: 1.2 }}>{currentWord.word}</h2>
 
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '400px', margin: '0 auto' }}>
                         <input

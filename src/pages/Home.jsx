@@ -216,7 +216,7 @@ export default function Home() {
                             variants={container}
                             initial="hidden"
                             animate="show"
-                            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '2rem' }}
+                            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}
                         >
                             {filteredDays.map((day) => (
                                 <motion.div key={day} variants={item} className="glass-panel-gradient" style={{
