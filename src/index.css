@@ -5,37 +5,111 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Ensure font inheritance for form elements */
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-variation-settings: inherit;
+}
+
 :root {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
+  /* Rich Black Background */
+  --bg-dark: #000000;
 
-  --glass-bg: rgba(30, 41, 59, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-highlight: rgba(255, 255, 255, 0.05);
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --text-muted: #525252;
 
-  --accent: #8b5cf6;
-  /* Violet */
-  --accent-hover: #7c3aed;
+  /* Glassmorphism Variables */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-border-hover: rgba(255, 255, 255, 0.15);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 
-  --success: #10b981;
-  --error: #ef4444;
+  /* Modern Gradient Colors */
+  --accent-cyan: #22d3ee;
+  --accent-purple: #c084fc;
+  --accent-pink: #f472b6;
 
-  --font-main: "Google Sans Flex", "Noto Sans KR", system-ui, -apple-system, sans-serif;
+  --success: #34d399;
+  --error: #fb7185;
+
+  --font-main: "Google Sans Flex", sans-serif;
 }
 
 body {
   margin: 0;
   font-family: var(--font-main);
-  background-color: var(--bg-primary);
-  background-image:
-    radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%);
-  background-attachment: fixed;
+  /* Google Sans Flex Settings */
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings:
+    "slnt" 0,
+    "wdth" 100,
+    "GRAD" 0,
+    "ROND" 0;
+
+  background-color: var(--bg-dark);
   color: var(--text-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Ambient Background Mesh */
+body::before {
+  content: "";
+  position: fixed;
+  top: -20vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120vw;
+  height: 100vh;
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(120, 119, 198, 0.15), transparent 50%),
+    radial-gradient(circle at 100% 0%, rgba(192, 132, 252, 0.1), transparent 40%),
+    radial-gradient(circle at 0% 0%, rgba(34, 211, 238, 0.1), transparent 40%);
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Center Glow Spot */
+body::after {
+  content: "";
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: conic-gradient(from 180deg at 50% 50%,
+      rgba(192, 132, 252, 0.2),
+      rgba(34, 211, 238, 0.2),
+      rgba(244, 114, 182, 0.2),
+      rgba(192, 132, 252, 0.2));
+  filter: blur(100px);
+  border-radius: 50%;
+  opacity: 0.6;
+  z-index: -1;
+  pointer-events: none;
+  animation: glow-pulse 10s ease-in-out infinite alternate;
+}
+
+@keyframes glow-pulse {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.5;
+  }
+
+  100% {
+    transform: translateX(-50%) scale(1.1);
+    opacity: 0.7;
+  }
 }
 
 #root {
@@ -45,68 +119,200 @@ body {
   flex-direction: column;
 }
 
-/* Utilities */
+/* Glass Panel: Minimal & Sophisticated */
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--glass-border);
-  border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+  border-radius: 24px;
+  box-shadow: var(--glass-shadow);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  overflow: hidden;
+  /* For inner sheen */
+  position: relative;
+}
+
+.glass-panel:hover {
+  border-color: var(--glass-border-hover);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Gradient Border Panel - Pseudo-element Method */
+.glass-panel-gradient {
+  background: var(--glass-bg);
+  border-radius: 24px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  /* Remove real border */
+  border: 1px solid transparent;
+  /* Fallback */
+  background-clip: padding-box;
+  /* Important for clean edges */
+}
+
+/* The Gradient Border */
+.glass-panel-gradient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  padding: 2.5px;
+  /* Use a larger background for animation flow */
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.6), rgba(192, 132, 252, 0.6), rgba(244, 114, 182, 0.6), rgba(34, 211, 238, 0.6));
+  background-size: 300% 300%;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+/* Hover Animation Keyframes */
+@keyframes border-flow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.glass-panel-gradient:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(192, 132, 252, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  /* Lighten bg on hover */
+}
+
+/* Apply animation on hover */
+.glass-panel-gradient:hover::before {
+  background: linear-gradient(135deg, #22d3ee, #c084fc, #f472b6, #22d3ee);
+  background-size: 300% 300%;
+  animation: border-flow 3s ease infinite;
+}
+
+/* Pill shape variant for search bar */
+.glass-panel-gradient.pill,
+.glass-panel-gradient.pill::before {
+  border-radius: 9999px;
+}
+
+/* Typography & Headers */
+h1,
+h2,
+h3 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
 }
 
 .text-gradient {
-  background: linear-gradient(to right, #c084fc, #38bdf8);
+  background: linear-gradient(135deg, #fff 30%, #a5f3fc 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  display: inline-block;
 }
 
+.text-gradient-multi {
+  background: linear-gradient(to right, #22d3ee, #c084fc, #f472b6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+}
+
+/* Interactive Elements & Buttons */
 .btn-primary {
-  background: var(--accent);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 12px;
-  font-weight: 600;
-  border: none;
+  padding: 0.875rem 1.75rem;
+  border-radius: 9999px;
+  /* Pill shape */
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 1rem;
+  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
+  transition: 0.5s;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
 }
 
 .btn-primary:hover {
-  background: var(--accent-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 0 20px rgba(192, 132, 252, 0.15);
 }
 
 .btn-primary:active {
-  transform: translateY(0);
+  transform: scale(0.98);
 }
 
-/* Layout helpers */
+/* Layout Container */
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 4rem 1.5rem;
   width: 100%;
 }
 
+/* Inputs */
 input {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--glass-border);
   color: var(--text-primary);
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
   font-size: 1rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s ease;
+  width: 100%;
 }
 
 input:focus {
-  border-color: var(--accent);
+  border-color: rgba(192, 132, 252, 0.5);
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 4px rgba(192, 132, 252, 0.1);
+}
+
+input::placeholder {
+  color: var(--text-muted);
 }

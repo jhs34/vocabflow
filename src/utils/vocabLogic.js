@@ -9,8 +9,8 @@ export function parseAnswerList(rawString) {
     // 1. 괄호와 괄호 안의 내용 제거 (소괄호 (), 대괄호 [], 꺾쇠 <>)
     let cleaned = rawString.replace(/\(.*?\)|\[.*?\]|<.*?>/g, '');
 
-    // 2. 특수문자 제거 (물결표 ~, 점 · 등)
-    cleaned = cleaned.replace(/[~·]/g, '');
+    // 2. 특수문자 제거 (물결표 ~, 점 ·, 마침표 .)
+    cleaned = cleaned.replace(/[~·.]/g, '');
 
     // 3. 쉼표(,)를 기준으로 분리하여 배열로 만듦
     let answers = cleaned.split(',');
@@ -36,8 +36,8 @@ export function checkAnswer(userInput, allowedAnswers) {
         let s = str;
         // 1. 괄호와 그 안의 내용 제거
         s = s.replace(/\(.*?\)|\[.*?\]|<.*?>/g, '');
-        // 2. 특수문자 제거 (~, ·)
-        s = s.replace(/[~·]/g, '');
+        // 2. 특수문자 제거 (~, ·, .)
+        s = s.replace(/[~·.]/g, '');
         // 3. 공백 제거
         s = s.replace(/\s+/g, '');
         return s;
@@ -57,63 +57,99 @@ export function checkAnswer(userInput, allowedAnswers) {
  * @param {Array} wordData 
  */
 export function processWordData(wordData) {
+    if (!Array.isArray(wordData)) return [];
     return wordData.map(item => ({
         ...item,
         answer_list: parseAnswerList(item.raw_meaning)
     }));
 }
 
-const MOCK_DATA = [
-    { id: 1, word: "ignorant", raw_meaning: "무식한, 모르는" },
-    { id: 2, word: "accept", raw_meaning: "(설명·학설 등을) 인정하다, 받아들이다" },
-    { id: 3, word: "household", raw_meaning: "가정[가족]의, 가구" },
-    { id: 4, word: "dynamic", raw_meaning: "동적인, (성격이) 활발한" },
-    { id: 5, word: "aesthetics", raw_meaning: "미학, (성격이) 미적 감각" }
-];
-
 export async function fetchLessonData(dayId) {
     try {
         const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
         const response = await fetch(`${baseUrl}words/day${dayId}.json`);
         if (!response.ok) {
-            console.warn(`Failed to fetch day${dayId}.json, using mock data.`);
-            // 데모를 위해 404일 경우 모의 데이터 반환 (실제 배포시 제거 가능)
-            return processWordData(MOCK_DATA);
+            console.warn(`Failed to fetch day${dayId}.json`);
+            return [];
         }
         const data = await response.json();
         return processWordData(data);
     } catch (error) {
         console.error("Error fetching lesson data:", error);
-        return processWordData(MOCK_DATA);
+        return [];
     }
 }
-// ... (previous code)
 
 // 가용 Day 목록을 스캔하는 함수
-// 가용 Day 목록을 스캔하는 함수
-export async function getAvailableDays(maxDays = 50) {
+export async function getAvailableDays(maxDays = 100) {
+    const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
     const available = [];
+
+    // 배치 처리를 통해 브라우저 요청 제한(보통 6개)을 우회하고 안정적으로 가져옵니다.
+    const batchSize = 10;
+
+    for (let i = 1; i <= maxDays; i += batchSize) {
+        const batchPromises = [];
+        for (let j = i; j < i + batchSize && j <= maxDays; j++) {
+            batchPromises.push(
+                fetch(`${baseUrl}words/day${j}.json`)
+                    .then(async res => {
+                        if (!res.ok) return null;
+                        try {
+                            const json = await res.json();
+                            return Array.isArray(json) && json.length > 0 ? j : null;
+                        } catch {
+                            return null;
+                        }
+                    })
+                    .catch(() => null)
+            );
+        }
+
+        const results = await Promise.all(batchPromises);
+        results.forEach(val => {
+            if (val !== null) available.push(val);
+        });
+    }
+
+    return available.sort((a, b) => a - b);
+}
+
+// 전체 단어 검색 함수
+export async function searchAllWords(query) {
+    if (!query) return [];
+    const lowerQuery = query.toLowerCase();
+
+    // 1. 가용 가능한 모든 날짜를 먼저 확인 (캐싱된 목록이 있다면 좋겠지만, 여기선 간단히 스캔)
+    // 성능을 위해 일단 최대 50일 정도만 검색하거나, getAvailableDays 결과를 활용해야 함.
+    // 여기서는 사용자가 검색 버튼을 누르면 getAvailableDays를 먼저 호출한다고 가정하거나,
+    // 직접 1~60 정도를 찔러봅니다.
+    const days = await getAvailableDays(60);
+
+    const results = [];
     const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 
-    // 병렬 요청으로 빠르게 확인
-    const checks = Array.from({ length: maxDays }, (_, i) => i + 1).map(async (i) => {
+    // 병렬로 모든 파일 fetch
+    await Promise.all(days.map(async (day) => {
         try {
-            // 직접 JSON 파싱 시도 (가장 확실한 방법)
-            const res = await fetch(`${baseUrl}words/day${i}.json`);
-            if (!res.ok) return null;
+            const res = await fetch(`${baseUrl}words/day${day}.json`);
+            if (!res.ok) return;
+            const data = await res.json();
 
-            const json = await res.json();
-            // 배열이고 내용이 있어야 유효한 포맷으로 인정
-            if (Array.isArray(json) && json.length > 0) {
-                return i;
-            }
-            return null;
-        } catch {
-            // JSON 파싱 에러(HTML 리턴 등) 시 여기로 옴
-            return null;
+            // 단어 검색
+            data.forEach(item => {
+                if (item.word.toLowerCase().includes(lowerQuery) ||
+                    item.raw_meaning.includes(query)) {
+                    results.push({
+                        day,
+                        ...item
+                    });
+                }
+            });
+        } catch (e) {
+            // ignore error
         }
-    });
+    }));
 
-    const results = await Promise.all(checks);
-    return results.filter(d => d !== null).sort((a, b) => a - b);
+    return results.sort((a, b) => a.day - b.day);
 }
