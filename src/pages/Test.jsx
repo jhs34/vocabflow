@@ -144,7 +144,7 @@ export default function Test() {
                     exit={{ opacity: 0, x: -50, filter: 'blur(10px)' }}
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                     className="glass-panel-gradient"
-                    style={{ padding: '3rem 2rem', textAlign: 'center', position: 'relative' }}
+                    style={{ padding: '3rem 2rem', textAlign: 'center', position: 'relative', willChange: 'transform, opacity' }}
                     onAnimationComplete={() => inputRef.current?.focus()}
                 >
                     <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '1rem' }}>Translate this word:</p>

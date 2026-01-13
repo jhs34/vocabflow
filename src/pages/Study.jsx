@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Layers, List as ListIcon, Eye, EyeOff } from 'lucide-react';
 import { fetchLessonData } from '../utils/vocabLogic';
@@ -7,89 +7,99 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Separate Flashcard Component to isolate Flip State
 function Flashcard({ word }) {
     const [isFlipped, setIsFlipped] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
 
     return (
-        <div
-            style={{ perspective: '1000px', cursor: 'pointer', height: '300px' }}
-            onClick={() => setIsFlipped(!isFlipped)}
-        >
+        <div style={{ perspective: '1000px', cursor: 'pointer', height: '300px' }}>
             <motion.div
-                initial={false}
-                animate={{ rotateY: isFlipped ? 180 : 0 }}
-                transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                style={{
-                    position: 'relative',
-                    width: '100%',
-                    height: '100%',
-                    transformStyle: 'preserve-3d',
-                }}
+                whileHover={{ y: -5 }}
+                onHoverStart={() => setIsHovered(true)}
+                onHoverEnd={() => setIsHovered(false)}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                onClick={() => setIsFlipped(!isFlipped)}
+                style={{ width: '100%', height: '100%' }}
             >
-                {/* Front */}
-                <div className="glass-panel-gradient" style={{
-                    position: 'absolute',
-                    width: '100%',
-                    height: '100%',
-                    backfaceVisibility: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden'
-                }}>
-                    <h2 className="text-gradient-multi" style={{
-                        fontSize: 'clamp(2.5rem, 8vw, 3.5rem)',
-                        fontWeight: '800',
-                        margin: 0,
-                        textAlign: 'center',
-                        wordBreak: 'break-word',
-                        overflowWrap: 'anywhere',
-                        lineHeight: 1.1,
-                        padding: '0 1rem'
-                    }}>{word.word}</h2>
-                    <p style={{ marginTop: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Tap to see meaning</p>
-                </div>
-
-                {/* Back */}
-                <div className="glass-panel-gradient" style={{
-                    position: 'absolute',
-                    width: '100%',
-                    height: '100%',
-                    backfaceVisibility: 'hidden',
-                    transform: 'rotateY(180deg)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    overflow: 'hidden'
-                }}>
-                    <h3 style={{
-                        fontSize: '1.8rem',
-                        fontWeight: 'bold',
-                        color: '#fff',
-                        textAlign: 'center',
-                        padding: '0 1.5rem',
-                        lineHeight: '1.4',
-                        wordBreak: 'keep-all',
-                        overflowWrap: 'anywhere'
-                    }}>{word.raw_meaning}</h3>
-                    <div style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-                        {word.answer_list.map((ans, idx) => (
-                            <span key={idx} style={{
-                                background: 'rgba(255,255,255,0.1)',
-                                padding: '0.3rem 0.8rem',
-                                borderRadius: '20px',
-                                fontSize: '0.9rem',
-                                color: 'var(--accent-cyan)'
-                            }}>
-                                {ans}
-                            </span>
-                        ))}
+                <motion.div
+                    initial={false}
+                    animate={{ rotateY: isFlipped ? 180 : 0 }}
+                    transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                        position: 'relative',
+                        width: '100%',
+                        height: '100%',
+                        transformStyle: 'preserve-3d',
+                        willChange: 'transform'
+                    }}
+                >
+                    {/* Front */}
+                    <div className={`glass-panel-gradient ${isHovered ? 'force-hover' : ''}`} style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        backfaceVisibility: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden'
+                    }}>
+                        <h2 className="text-gradient-multi" style={{
+                            fontSize: 'clamp(2.5rem, 8vw, 3.5rem)',
+                            fontWeight: '800',
+                            margin: 0,
+                            textAlign: 'center',
+                            wordBreak: 'break-word',
+                            overflowWrap: 'anywhere',
+                            lineHeight: 1.1,
+                            padding: '0 1rem'
+                        }}>{word.word}</h2>
+                        <p style={{ marginTop: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Tap to see meaning</p>
                     </div>
-                </div>
+
+                    {/* Back */}
+                    <div className={`glass-panel-gradient ${isHovered ? 'force-hover' : ''}`} style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        backfaceVisibility: 'hidden',
+                        transform: 'rotateY(180deg)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden'
+                    }}>
+                        <h3 style={{
+                            fontSize: '1.8rem',
+                            fontWeight: 'bold',
+                            color: '#fff',
+                            textAlign: 'center',
+                            padding: '0 1.5rem',
+                            lineHeight: '1.4',
+                            wordBreak: 'keep-all',
+                            overflowWrap: 'anywhere'
+                        }}>{word.raw_meaning}</h3>
+                        <div style={{ marginTop: '2rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                            {word.answer_list.map((ans, idx) => (
+                                <span key={idx} style={{
+                                    background: 'rgba(255,255,255,0.1)',
+                                    padding: '0.3rem 0.8rem',
+                                    borderRadius: '20px',
+                                    fontSize: '0.9rem',
+                                    color: 'var(--accent-cyan)'
+                                }}>
+                                    {ans}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </motion.div>
             </motion.div>
         </div>
     );
 }
+
+const MemoizedFlashcard = memo(Flashcard);
 
 export default function Study() {
     const { dayId } = useParams();
@@ -274,9 +284,9 @@ export default function Study() {
                                 initial="enter"
                                 animate="center"
                                 exit="exit"
-                                style={{ width: '100%', height: '100%', position: 'absolute' }}
+                                style={{ width: '100%', height: '100%', position: 'absolute', willChange: 'transform, opacity' }}
                             >
-                                <Flashcard word={currentWord} />
+                                <MemoizedFlashcard word={currentWord} />
                             </motion.div>
                         </AnimatePresence>
 

@@ -191,15 +191,21 @@ body::after {
   }
 }
 
+/* Default Hover Behavior (Mouse) */
 .glass-panel-gradient:hover {
-  transform: translateY(-4px);
   box-shadow: 0 10px 30px rgba(192, 132, 252, 0.15);
   background: rgba(255, 255, 255, 0.05);
-  /* Lighten bg on hover */
 }
 
-/* Apply animation on hover */
-.glass-panel-gradient:hover::before {
+/* Programmatic Hover (Javascript) - No Transform */
+.glass-panel-gradient.force-hover {
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px rgba(192, 132, 252, 0.15);
+}
+
+/* Apply animation on hover (Both) */
+.glass-panel-gradient:hover::before,
+.glass-panel-gradient.force-hover::before {
   background: linear-gradient(135deg, #22d3ee, #c084fc, #f472b6, #22d3ee);
   background-size: 300% 300%;
   animation: border-flow 3s ease infinite;
