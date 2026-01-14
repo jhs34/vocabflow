@@ -1,16 +1,16 @@
 import { useState, useEffect, memo } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ChevronLeft, ChevronRight, Layers, List as ListIcon, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Layers, List as ListIcon, Eye, EyeOff, Shuffle, ListOrdered, Bookmark } from 'lucide-react';
 import { fetchLessonData } from '../utils/vocabLogic';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Separate Flashcard Component to isolate Flip State
-function Flashcard({ word }) {
+function Flashcard({ word, isBookmarked, onToggleBookmark }) {
     const [isFlipped, setIsFlipped] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
     return (
-        <div style={{ perspective: '1000px', cursor: 'pointer', height: '300px' }}>
+        <div style={{ perspective: '1000px', cursor: 'pointer', height: '300px', position: 'relative' }}>
             <motion.div
                 whileHover={{ y: -5 }}
                 onHoverStart={() => setIsHovered(true)}
@@ -53,7 +53,33 @@ function Flashcard({ word }) {
                             lineHeight: 1.1,
                             padding: '0 1rem'
                         }}>{word.word}</h2>
+                        <span style={{ fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.4)', marginTop: '0.5rem', fontWeight: 500 }}>#{word.id}</span>
                         <p style={{ marginTop: '1.5rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Tap to see meaning</p>
+
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleBookmark(word.id);
+                            }}
+                            style={{
+                                position: 'absolute',
+                                top: '15px',
+                                right: '15px',
+                                background: 'rgba(0,0,0,0.3)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '36px',
+                                height: '36px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                zIndex: 10,
+                                color: isBookmarked ? 'var(--accent-pink)' : 'var(--text-secondary)'
+                            }}
+                        >
+                            <Bookmark size={20} fill={isBookmarked ? "currentColor" : "none"} />
+                        </button>
                     </div>
 
                     {/* Back */}
@@ -70,7 +96,7 @@ function Flashcard({ word }) {
                         overflow: 'hidden'
                     }}>
                         <h3 style={{
-                            fontSize: '1.8rem',
+                            fontSize: 'clamp(1.4rem, 4vw + 0.5rem, 1.8rem)',
                             fontWeight: 'bold',
                             color: '#fff',
                             textAlign: 'center',
@@ -92,9 +118,36 @@ function Flashcard({ word }) {
                                 </span>
                             ))}
                         </div>
+
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleBookmark(word.id);
+                            }}
+                            style={{
+                                position: 'absolute',
+                                top: '15px',
+                                right: '15px',
+                                background: 'rgba(0,0,0,0.3)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '36px',
+                                height: '36px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                zIndex: 10,
+                                color: isBookmarked ? 'var(--accent-pink)' : 'var(--text-secondary)'
+                            }}
+                        >
+                            <Bookmark size={20} fill={isBookmarked ? "currentColor" : "none"} />
+                        </button>
                     </div>
                 </motion.div>
             </motion.div>
+
+
         </div>
     );
 }
@@ -109,24 +162,77 @@ export default function Study() {
     const [viewMode, setViewMode] = useState('card');
     const [hideMeaning, setHideMeaning] = useState(false);
     const [direction, setDirection] = useState(0);
+    const [isRandom, setIsRandom] = useState(() => localStorage.getItem('vocab_sort_mode') !== 'sequential');
+
+    // Bookmark Logic
+    const [bookmarks, setBookmarks] = useState([]); // Array of strings "dayId-wordId"
+    const [showBookmarksOnly, setShowBookmarksOnly] = useState(false);
+
+    useEffect(() => {
+        const stored = localStorage.getItem('vocab_bookmarks');
+        if (stored) {
+            setBookmarks(JSON.parse(stored));
+        }
+    }, []);
+
+    const toggleBookmark = (wordId) => {
+        // Ensure consistent key formats (e.g. "5-12")
+        const dId = parseInt(dayId); // Normalized Day ID
+        const key = `${dId}-${wordId}`; // e.g., "5-12" or "5-stringId"
+
+        let newBookmarks;
+        if (bookmarks.includes(key)) {
+            newBookmarks = bookmarks.filter(b => b !== key);
+        } else {
+            newBookmarks = [...bookmarks, key];
+        }
+        setBookmarks(newBookmarks);
+        localStorage.setItem('vocab_bookmarks', JSON.stringify(newBookmarks));
+    };
+
+    const isBookmarked = (wordId) => {
+        const dId = parseInt(dayId);
+        return bookmarks.includes(`${dId}-${wordId}`);
+    };
+
+    // Filter words based on Bookmark toggle
+    // Removed useMemo to ensure instant updates and prevent stale closures
+    const displayedWords = showBookmarksOnly
+        ? words.filter(w => isBookmarked(w.id))
+        : words;
 
     useEffect(() => {
         async function load() {
             setLoading(true);
             const originalData = await fetchLessonData(dayId);
-            const shuffled = [...originalData];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            let processed = [...originalData];
+
+            if (isRandom) {
+                // Fisher-Yates Shuffle
+                for (let i = processed.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [processed[i], processed[j]] = [processed[j], processed[i]];
+                }
+            } else {
+                // Sort by ID
+                processed.sort((a, b) => a.id - b.id);
             }
-            setWords(shuffled);
+
+            setWords(processed);
+            setCurrentIndex(0);
             setLoading(false);
         }
         load();
-    }, [dayId]);
+    }, [dayId, isRandom]); // Re-load when sort changes
+
+    const toggleSortMode = () => {
+        const newMode = !isRandom;
+        setIsRandom(newMode);
+        localStorage.setItem('vocab_sort_mode', newMode ? 'random' : 'sequential');
+    };
 
     const handleNext = () => {
-        if (currentIndex >= words.length - 1) return;
+        if (currentIndex >= displayedWords.length - 1) return;
         setDirection(1);
         setCurrentIndex(c => c + 1);
     };
@@ -138,9 +244,39 @@ export default function Study() {
     };
 
     if (loading) return <div className="glass-panel" style={{ margin: '2rem', padding: '2rem', textAlign: 'center' }}>Loading...</div>;
-    if (words.length === 0) return <div className="glass-panel" style={{ margin: '2rem', padding: '2rem', textAlign: 'center' }}>No words found.</div>;
+    // Check global words length first
+    if (words.length === 0) return <div className="glass-panel" style={{ margin: '2rem', padding: '2rem', textAlign: 'center' }}>No words found in this lesson.</div>;
 
-    const currentWord = words[currentIndex];
+    // If filtering by bookmarks returns empty
+    if (showBookmarksOnly && displayedWords.length === 0) {
+        return (
+            <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem' }}>
+                <header style={{ marginBottom: '2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <Link to="/" style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+                            <ArrowLeft size={20} /> Back
+                        </Link>
+                    </div>
+                </header>
+                <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
+                    <Bookmark size={48} color="var(--text-secondary)" style={{ opacity: 0.5 }} />
+                    <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>No bookmarked words yet.</div>
+                    <p style={{ color: 'var(--text-secondary)' }}>Go back to full list and bookmark some words!</p>
+                    <button
+                        className="btn-primary"
+                        onClick={() => {
+                            setShowBookmarksOnly(false);
+                            setCurrentIndex(0);
+                        }}
+                    >
+                        Show All Words
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
+    const currentWord = displayedWords[currentIndex];
 
     // Slide Variants
     const slideVariants = {
@@ -181,12 +317,15 @@ export default function Study() {
     return (
         <div style={{ maxWidth: '600px', margin: '0 auto', padding: '1rem', paddingBottom: '5rem' }}>
             <header style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Link to="/" style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
-                        <ArrowLeft size={20} /> Back
-                    </Link>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Link to="/" style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+                            <ArrowLeft size={20} /> Back
+                        </Link>
+                        <span style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '1.2rem' }}>Day {dayId}</span>
+                    </div>
 
-                    <div style={{ display: 'flex', gap: '8px' }}>
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <div style={{ background: 'rgba(30, 41, 59, 0.5)', padding: '4px', borderRadius: '8px', display: 'flex', gap: '4px' }}>
                             <button
                                 onClick={() => setViewMode('list')}
@@ -225,28 +364,68 @@ export default function Study() {
                                 <Layers size={16} /> Card
                             </button>
                         </div>
-                    </div>
+                        {/* Bookmark Filter Toggle */}
+                        <button
+                            onClick={() => {
+                                setShowBookmarksOnly(!showBookmarksOnly);
+                                setCurrentIndex(0); // Reset index
+                            }}
+                            style={{
+                                background: showBookmarksOnly ? 'var(--accent-pink)' : 'rgba(30, 41, 59, 0.5)',
+                                padding: '10px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                color: showBookmarksOnly ? 'white' : 'var(--text-secondary)',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                            }}
+                            title={showBookmarksOnly ? "Show All Words" : "Show Bookmarks Only"}
+                        >
+                            <Bookmark size={20} fill={showBookmarksOnly ? "white" : "none"} />
+                        </button>
 
-                    <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>Day {dayId}</span>
+                        {/* Sort Toggle Button inside the center group */}
+                        <button
+                            onClick={toggleSortMode}
+                            style={{
+                                background: 'rgba(30, 41, 59, 0.5)',
+                                padding: '10px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                color: 'var(--text-secondary)',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.2s',
+                            }}
+                            title={isRandom ? "Random Order" : "Sequential Order"}
+                        >
+                            {isRandom ? <Shuffle size={20} color="var(--accent-purple)" /> : <ListOrdered size={20} color="var(--accent-cyan)" />}
+                        </button>
+                    </div>
                 </div>
-                {viewMode === 'card' && (
+                {viewMode === 'card' && currentWord && (
                     <div style={{ alignSelf: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                        {currentIndex + 1} / {words.length}
+                        {currentIndex + 1} / {displayedWords.length}
                     </div>
                 )}
             </header>
 
             <AnimatePresence mode="wait">
-                {viewMode === 'list' ? (
+                {viewMode === 'list' && (
                     <motion.div
-                        key="list-mode"
+                        key={showBookmarksOnly ? 'list-bookmarks' : 'list-all'}
                         variants={listContainer}
                         initial="hidden"
                         animate="show"
                         exit={{ opacity: 0 }}
                         style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
                     >
-                        {words.map((item, idx) => (
+                        {displayedWords.map((item, idx) => (
                             <motion.div
                                 key={item.id}
                                 variants={listItem}
@@ -254,8 +433,14 @@ export default function Study() {
                                 style={{ padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1.5rem' }}
                             >
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', opacity: 0.7, minWidth: '24px' }}>{idx + 1}</span>
-                                    <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>{item.word}</span>
+                                    <button
+                                        onClick={() => toggleBookmark(item.id)}
+                                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: isBookmarked(item.id) ? 'var(--accent-pink)' : 'var(--text-secondary)', padding: '5px', transform: 'translateY(2px)' }}
+                                    >
+                                        <Bookmark size={18} fill={isBookmarked(item.id) ? "currentColor" : "none"} />
+                                    </button>
+                                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', opacity: 0.7, minWidth: '24px' }}>{item.id}</span>
+                                    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', transform: 'translateY(-1px)', display: 'inline-block' }}>{item.word}</span>
                                 </div>
                                 <span style={{
                                     color: 'var(--text-secondary)',
@@ -274,7 +459,8 @@ export default function Study() {
                             </motion.div>
                         ))}
                     </motion.div>
-                ) : (
+                )}
+                {viewMode === 'card' && currentWord && (
                     <div style={{ position: 'relative', height: '400px' }}>
                         <AnimatePresence mode="popLayout" custom={direction}>
                             <motion.div
@@ -286,7 +472,7 @@ export default function Study() {
                                 exit="exit"
                                 style={{ width: '100%', height: '100%', position: 'absolute', willChange: 'transform, opacity' }}
                             >
-                                <MemoizedFlashcard word={currentWord} />
+                                <MemoizedFlashcard word={currentWord} isBookmarked={isBookmarked(currentWord.id)} onToggleBookmark={toggleBookmark} />
                             </motion.div>
                         </AnimatePresence>
 
@@ -294,7 +480,7 @@ export default function Study() {
                             <button className="btn-primary" onClick={handlePrev} disabled={currentIndex === 0} style={{ opacity: currentIndex === 0 ? 0.5 : 1 }}>
                                 <ChevronLeft /> Prev
                             </button>
-                            <button className="btn-primary" onClick={handleNext} disabled={currentIndex === words.length - 1} style={{ opacity: currentIndex === words.length - 1 ? 0.5 : 1 }}>
+                            <button className="btn-primary" onClick={handleNext} disabled={currentIndex === displayedWords.length - 1} style={{ opacity: currentIndex === displayedWords.length - 1 ? 0.5 : 1 }}>
                                 Next <ChevronRight />
                             </button>
                         </div>

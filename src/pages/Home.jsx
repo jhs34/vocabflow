@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Book, GraduationCap, Search, X } from 'lucide-react';
+import { Book, GraduationCap, Search, X, Star, Bookmark } from 'lucide-react';
 import { getAvailableDays, searchAllWords } from '../utils/vocabLogic';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -10,6 +10,33 @@ export default function Home() {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState(null); // null: Day List Mode, []: Word Search Result (Empty or Populated)
     const [isSearching, setIsSearching] = useState(false);
+
+    // Favorites Logic
+    const [favorites, setFavorites] = useState([]);
+    const [isFavoritesLoaded, setIsFavoritesLoaded] = useState(false);
+    const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+    const longPressTimer = useRef(null);
+
+    // Load Favorites from LocalStorage on mount
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem('my_vocab_favorites');
+            if (stored) {
+                setFavorites(JSON.parse(stored));
+            }
+        } catch (e) {
+            console.error("Failed to load favorites", e);
+        } finally {
+            setIsFavoritesLoaded(true);
+        }
+    }, []);
+
+    // Save Favorites to LocalStorage whenever it changes
+    useEffect(() => {
+        if (isFavoritesLoaded) {
+            localStorage.setItem('my_vocab_favorites', JSON.stringify(favorites));
+        }
+    }, [favorites, isFavoritesLoaded]);
 
     useEffect(() => {
         async function loadDays() {
@@ -62,32 +89,62 @@ export default function Home() {
         setIsSearching(false);
     };
 
-    // 렌더링할 Day 리스트 계산 (검색어가 숫자인 경우 바로 필터링)
+    // Favorites Implementation
+    const toggleFavorite = (day) => {
+        setFavorites(prev => {
+            if (prev.includes(day)) {
+                return prev.filter(d => d !== day);
+            } else {
+                return [...prev, day];
+            }
+        });
+
+        // Visual feedback (optional vibration)
+        if (navigator.vibrate) navigator.vibrate(50);
+    };
+
+    const startPress = (day) => {
+        longPressTimer.current = setTimeout(() => {
+            toggleFavorite(day);
+        }, 600); // 800ms -> 600ms for better responsiveness
+    };
+
+    const cancelPress = () => {
+        if (longPressTimer.current) {
+            clearTimeout(longPressTimer.current);
+            longPressTimer.current = null;
+        }
+    };
+
+    // 렌더링할 Day 리스트 계산 (검색어 + 즐겨찾기 필터)
     const filteredDays = (() => {
         // 단어 검색 결과가 활성화되어 있으면 빈 배열 반환 (UI 분리)
         if (searchResults !== null) return [];
 
+        let currentDays = availableDays;
+
+        // 즐겨찾기 필터 적용
+        if (showFavoritesOnly) {
+            currentDays = currentDays.filter(day => favorites.includes(day));
+        }
+
         const trimmed = searchQuery.trim();
-        if (!trimmed) return availableDays;
+        if (!trimmed) return currentDays;
 
         // 1. "Day 5" 형식
         const dayMatch = trimmed.match(/^day\s*(\d+)$/i);
         if (dayMatch) {
             const num = parseInt(dayMatch[1]);
-            return availableDays.includes(num) ? [num] : [];
+            return currentDays.includes(num) ? [num] : [];
         }
 
         // 2. 숫자만 있는 경우 ("5", "12")
         if (/^\d+$/.test(trimmed)) {
             const num = parseInt(trimmed);
-            return availableDays.includes(num) ? [num] : [];
+            return currentDays.includes(num) ? [num] : [];
         }
 
-        // 3. 그 외 (단어 검색 전 단계 등) - 일단 전체 보여주거나, 사용자 경험에 따라 다름.
-        // 여기서는 숫자 형식이 아니면(단어 검색어라면) Day는 안 보여주는 게 낫다? 
-        // 아니면 엔터 치기 전까지는 그냥 전체 목록 보여주는 게 나을 수도 있음.
-        // 사용자가 "apple"을 치는 동안에는 Day 목록이 유지되다가 엔터 치면 결과로 바뀌는 게 자연스러움.
-        return availableDays;
+        return currentDays;
     })();
 
     const container = {
@@ -134,6 +191,38 @@ export default function Home() {
                 >
                     Choose a day to start studying.
                 </motion.p>
+
+                {/* Review Notebook Button */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.25, duration: 0.8 }}
+                    style={{ marginBottom: '2rem' }}
+                >
+                    <Link to="/review" style={{ textDecoration: 'none' }}>
+                        <button className="glass-panel-gradient"
+                            style={{
+                                padding: '0.8rem 2rem',
+                                borderRadius: '50px',
+                                border: '1px solid var(--accent-pink)',
+                                background: 'rgba(236, 72, 153, 0.1)',
+                                color: 'white',
+                                fontSize: '1.1rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                        >
+                            <Bookmark size={20} fill="white" />
+                            Open Bookmark Notebook
+                        </button>
+                    </Link>
+                </motion.div>
 
                 {/* Search Bar */}
                 <motion.form
@@ -203,42 +292,60 @@ export default function Home() {
                     )}
                 </div>
             ) : (
-                // --- Day 목록 모드 (기본 + 숫자 필터링) ---
+                // --- Day 목록 모드 (기본 + 숫자 필터링 + 즐겨찾기 필터링) ---
                 <>
                     {filteredDays.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '2rem' }} className="glass-panel">
-                            {/* 필터링 결과가 없다는 건, 해당 Day 파일이 없다는 뜻 */}
-                            {searchQuery ? `Day ${searchQuery} not found.` : "No lesson files found."}
+                            {showFavoritesOnly
+                                ? "No favorite lessons yet. Long press a day to add it!"
+                                : (searchQuery ? `Day ${searchQuery} not found.` : "No lesson files found.")}
                         </div>
                     ) : (
                         <motion.div
-                            key={searchQuery}
+                            key={searchQuery + showFavoritesOnly} // Re-animate when filter changes
                             variants={container}
                             initial="hidden"
                             animate="show"
-                            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1rem' }}
+                            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '0.9rem' }}
                         >
                             {filteredDays.map((day) => (
-                                <motion.div key={day} variants={item} className="glass-panel-gradient" style={{
-                                    padding: '1.5rem',
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    gap: '1rem',
-                                    cursor: 'default',
-                                    textAlign: 'center',
-                                    aspectRatio: '1 / 1',
-                                    justifyContent: 'center'
-                                }}>
-                                    <div style={{ fontSize: '1.5rem', fontWeight: '800', color: 'white' }}>Day <span style={{ color: 'var(--accent-purple)' }}>{day}</span></div>
+                                <motion.div
+                                    key={day}
+                                    variants={item}
+                                    className={`glass-panel-gradient ${favorites.includes(day) ? 'is-favorite' : ''}`}
 
-                                    <div style={{ display: 'grid', gap: '0.75rem' }}>
-                                        <Link to={`/study/${day}`} style={{ textDecoration: 'none' }}>
-                                            <button className="btn-primary" style={{ width: '100%', padding: '0.6rem', fontSize: '0.9rem' }}>
+                                    // Long Press Events
+                                    onMouseDown={() => startPress(day)}
+                                    onMouseUp={cancelPress}
+                                    onMouseLeave={cancelPress}
+                                    onTouchStart={() => startPress(day)}
+                                    onTouchEnd={cancelPress}
+
+                                    style={{
+                                        padding: '1rem',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '1.5rem',
+                                        cursor: 'default',
+                                        textAlign: 'center',
+                                        aspectRatio: '0.85',
+                                        justifyContent: 'center',
+                                        position: 'relative' // For absolute positioning of Star
+                                    }}
+                                >
+                                    {/* Favorite Star Indicator */}
+                                    {/* Favorite Indicator (handled by CSS class) */}
+
+                                    <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white' }}>Day <span style={{ color: 'var(--accent-purple)' }}>{day}</span></div>
+
+                                    <div style={{ display: 'grid', gap: '0.5rem', width: '100%' }}>
+                                        <Link to={`/study/${day}`} style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+                                            <button className="btn-primary" style={{ width: '90%', padding: '0.5rem', fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.7)' }}>
                                                 <Book size={16} /> Study
                                             </button>
                                         </Link>
-                                        <Link to={`/test/${day}`} style={{ textDecoration: 'none' }}>
-                                            <button className="btn-primary" style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '0.6rem', fontSize: '0.9rem' }}>
+                                        <Link to={`/test/${day}`} style={{ textDecoration: 'none', display: 'flex', justifyContent: 'center' }}>
+                                            <button className="btn-primary" style={{ width: '90%', background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', padding: '0.5rem', fontSize: '0.9rem', color: 'rgba(255, 255, 255, 0.7)' }}>
                                                 <GraduationCap size={16} /> Test
                                             </button>
                                         </Link>
@@ -248,6 +355,37 @@ export default function Home() {
                         </motion.div>
                     )}
                 </>
+            )}
+
+            {/* Favorite Floating Action Button */}
+            {!isSearching && searchResults === null && (
+                <motion.button
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                    style={{
+                        position: 'fixed',
+                        bottom: '2rem',
+                        left: '2rem',
+                        zIndex: 100,
+                        width: '3.5rem',
+                        height: '3.5rem',
+                        borderRadius: '50%',
+                        background: showFavoritesOnly ? 'var(--accent-purple)' : 'rgba(30, 41, 59, 0.8)',
+                        color: 'white',
+                        border: '1px solid var(--glass-border)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        backdropFilter: 'blur(10px)'
+                    }}
+                >
+                    <Star size={24} fill={showFavoritesOnly ? "white" : "none"} />
+                </motion.button>
             )}
         </div>
     );

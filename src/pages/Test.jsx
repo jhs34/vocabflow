@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, RotateCcw } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, RotateCcw, Shuffle, ListOrdered, Check, X, AlertCircle } from 'lucide-react';
 import { fetchLessonData, checkAnswer } from '../utils/vocabLogic';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -14,19 +14,109 @@ export default function Test() {
     const [score, setScore] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
     const inputRef = useRef(null);
+    const [isRandom, setIsRandom] = useState(() => localStorage.getItem('vocab_sort_mode') !== 'sequential');
+
+    // Store detailed results for review
+    const [testResults, setTestResults] = useState([]); // Array of { wordObj, input, isCorrect }
+
+    // Retry State
+    const [isRetryMode, setIsRetryMode] = useState(false);
+    const [retrySourceWords, setRetrySourceWords] = useState([]); // Words to use for retry
 
     useEffect(() => {
-        async function load() {
-            const originalData = await fetchLessonData(dayId);
-            const shuffled = [...originalData];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        // If in Retry Mode, do NOT fetch from API. Use retrySourceWords.
+        if (isRetryMode) {
+            let processed = [...retrySourceWords];
+            if (isRandom) {
+                // Shuffle logic duplicated
+                for (let i = processed.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [processed[i], processed[j]] = [processed[j], processed[i]];
+                }
+            } else {
+                processed.sort((a, b) => a.id - b.id);
             }
-            setWords(shuffled);
+            setWords(processed);
+            // Reset test state (except mode)
+            setCurrentIndex(0);
+            setScore(0);
+            setFeedback(null);
+            setUserInput('');
+            setIsFinished(false);
+            setTestResults([]);
+            return;
+        }
+
+        async function load() {
+            let processed = [];
+
+            if (dayId === 'bookmark') {
+                const stored = JSON.parse(localStorage.getItem('vocab_bookmarks') || '[]');
+                if (stored.length === 0) {
+                    setWords([]);
+                    return;
+                }
+
+                // Group bookmarks by day
+                const dayMap = {};
+                stored.forEach(key => {
+                    if (!key.includes('-')) return;
+                    const [d, w] = key.split('-');
+                    if (!dayMap[d]) dayMap[d] = [];
+                    dayMap[d].push(w);
+                });
+
+                // Fetch words for each day
+                for (const dayStr of Object.keys(dayMap)) {
+                    const data = await fetchLessonData(dayStr);
+                    if (!data) continue;
+                    const targetIds = dayMap[dayStr];
+                    const found = data.filter(w => targetIds.includes(String(w.id)));
+                    processed = [...processed, ...found];
+                }
+            } else {
+                const data = await fetchLessonData(dayId);
+                if (data) processed = [...data];
+            }
+
+            if (processed.length === 0) {
+                setWords([]);
+                return;
+            }
+
+            if (isRandom) {
+                // Fisher-Yates Shuffle
+                for (let i = processed.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [processed[i], processed[j]] = [processed[j], processed[i]];
+                }
+            } else {
+                // Sort by ID
+                processed.sort((a, b) => a.id - b.id);
+            }
+
+            setWords(processed);
+            resetTest();
         }
         load();
-    }, [dayId]);
+    }, [dayId, isRandom, isRetryMode]);
+
+    const resetTest = () => {
+        setCurrentIndex(0);
+        setScore(0);
+        setFeedback(null);
+        setUserInput('');
+        setIsFinished(false);
+        setTestResults([]);
+        setIsRetryMode(false); // Reset mode on full reset
+        setRetrySourceWords([]);
+    };
+
+    const toggleSortMode = () => {
+        const newMode = !isRandom;
+        setIsRandom(newMode);
+        localStorage.setItem('vocab_sort_mode', newMode ? 'random' : 'sequential');
+    };
 
     useEffect(() => {
         if (inputRef.current) inputRef.current.focus();
@@ -45,6 +135,13 @@ export default function Test() {
 
         const currentWord = words[currentIndex];
         const isCorrect = checkAnswer(userInput, currentWord.answer_list);
+
+        // Record result
+        setTestResults(prev => [...prev, {
+            wordObj: currentWord,
+            input: userInput,
+            isCorrect: isCorrect
+        }]);
 
         if (isCorrect) {
             setFeedback('correct');
@@ -69,37 +166,103 @@ export default function Test() {
         }
     };
 
+    const handleRetryIncorrect = () => {
+        const incorrectWords = testResults.filter(r => !r.isCorrect).map(r => r.wordObj);
+        if (incorrectWords.length === 0) return;
+
+        // Enter Retry Mode
+        setRetrySourceWords(incorrectWords);
+        setIsRetryMode(true); // This will trigger useEffect to reload words from retrySourceWords
+    };
+
+    const handleRetryAll = () => {
+        setIsRetryMode(false);
+        setRetrySourceWords([]);
+        // Force reload by triggering effect (isRetryMode change helps, but we might need explicit fetch call usage next render)
+        // Effect will run because isRetryMode changed to false.
+    };
+
     if (words.length === 0) return <div className="glass-panel" style={{ margin: '2rem', padding: '2rem', textAlign: 'center' }}>Loading...</div>;
 
     if (isFinished) {
         return (
-            <div className="container" style={{ textAlign: 'center' }}>
+            <div className="container" style={{ textAlign: 'center', paddingBottom: '3rem' }}>
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0, filter: 'blur(10px)' }}
                     animate={{ scale: 1, opacity: 1, filter: 'blur(0px)' }}
                     transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
                     className="glass-panel-gradient"
-                    style={{ padding: '3rem', maxWidth: '500px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}
+                    style={{ padding: '1.5rem 1rem', maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center' }}
                 >
-                    <h1 className="text-gradient-multi" style={{ fontSize: '2.5rem', margin: 0 }}>Test Complete!</h1>
-                    <div style={{ fontSize: '5rem', fontWeight: '800', margin: '1rem 0', color: 'white', lineHeight: 1 }}>
+                    <h1 className="text-gradient-multi" style={{ fontSize: '2rem', margin: 0 }}>Test Complete!</h1>
+                    <div style={{ fontSize: 'clamp(3.5rem, 12vw, 5rem)', fontWeight: '800', margin: '0.5rem 0', color: 'white', lineHeight: 1 }}>
                         {score} <span style={{ fontSize: '2rem', color: 'var(--text-secondary)', fontWeight: '400' }}>/ {words.length}</span>
                     </div>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem' }}>
-                        {score === words.length ? 'Perfect Score! 🎉' : 'Great job! Keep practicing.'}
+                        {isRetryMode ? 'Retry Round Complete!' : (score === words.length ? 'Perfect Score! 🎉' : 'Great job! Keep practicing.')}
                     </p>
-                    <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'center', width: '100%' }}>
-                        <Link to="/" className="btn-primary" style={{ textDecoration: 'none', flex: 1, display: 'flex', justifyContent: 'center' }}>
+
+                    <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'center', width: '100%', flexWrap: 'wrap' }}>
+                        <Link to="/" className="btn-primary" style={{ textDecoration: 'none', flex: 1, minWidth: '120px', display: 'flex', justifyContent: 'center' }}>
                             Home
                         </Link>
+                        {score < words.length && !isRetryMode && (
+                            <button
+                                onClick={handleRetryIncorrect}
+                                className="btn-primary"
+                                style={{ background: 'var(--error)', border: 'none', flex: 1.5, minWidth: '150px' }}
+                            >
+                                <AlertCircle size={28} style={{ marginRight: '8px' }} /> Retry Incorrect ({words.length - score})
+                            </button>
+                        )}
                         <button
-                            onClick={() => window.location.reload()}
+                            onClick={handleRetryAll}
                             className="btn-primary"
-                            style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', flex: 1 }}
+                            style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.2)', flex: 1, minWidth: '120px' }}
                         >
-                            <RotateCcw size={16} /> Retry
+                            <RotateCcw size={16} style={{ marginRight: '8px' }} /> Retry All
                         </button>
                     </div>
+
+                    {/* Review List */}
+                    <div style={{ marginTop: '2rem', width: '100%', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem' }}>
+                        <h3 style={{ marginBottom: '1.5rem', color: 'var(--text-secondary)', textAlign: 'left' }}>Review Answers</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', maxHeight: '300px', overflowY: 'auto', paddingRight: '0.5rem' }}>
+                            {testResults.map((result, idx) => (
+                                <div key={idx} style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    padding: '1rem',
+                                    borderRadius: '12px',
+                                    background: result.isCorrect ? 'rgba(16, 185, 129, 0.05)' : 'rgba(239, 68, 68, 0.05)',
+                                    border: `1px solid ${result.isCorrect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}`
+                                }}>
+                                    <div style={{ textAlign: 'left', flex: 1 }}>
+                                        <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>{result.wordObj.word}</div>
+                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                                            Correct: <span style={{ color: 'white' }}>{result.wordObj.answer_list.join(', ')}</span>
+                                        </div>
+                                    </div>
+                                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                                        {result.isCorrect ? (
+                                            <span style={{ color: 'var(--success)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <Check size={16} /> Correct
+                                            </span>
+                                        ) : (
+                                            <span style={{ color: 'var(--error)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                                <X size={16} /> Incorrect
+                                            </span>
+                                        )}
+                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', opacity: 0.7 }}>
+                                            You: {result.input || "(empty)"}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
                 </motion.div>
             </div>
         );
@@ -118,8 +281,30 @@ export default function Test() {
                 <Link to="/" style={{ color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
                     <ArrowLeft size={20} /> Quit
                 </Link>
-                <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '50px', fontSize: '0.9rem', color: 'var(--text-secondary)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    Question <span style={{ color: 'white', fontWeight: 'bold' }}>{currentIndex + 1}</span> / {words.length}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {/* Sort Toggle Button */}
+                    <button
+                        onClick={toggleSortMode}
+                        style={{
+                            background: 'rgba(30, 41, 59, 0.5)',
+                            padding: '10px',
+                            borderRadius: '8px',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            transition: 'all 0.2s',
+                        }}
+                        title={isRandom ? "Random Order" : "Sequential Order"}
+                    >
+                        {isRandom ? <Shuffle size={18} color="var(--accent-purple)" /> : <ListOrdered size={18} color="var(--accent-cyan)" />}
+                    </button>
+
+                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '0.5rem 1rem', borderRadius: '50px', fontSize: '0.9rem', color: 'var(--text-secondary)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        Question <span style={{ color: 'white', fontWeight: 'bold' }}>{currentIndex + 1}</span> / {words.length}
+                    </div>
                 </div>
             </header>
 

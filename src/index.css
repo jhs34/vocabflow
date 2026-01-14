@@ -14,6 +14,31 @@ select {
   font-variation-settings: inherit;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
 :root {
   /* Rich Black Background */
   --bg-dark: #000000;
@@ -160,7 +185,8 @@ body::after {
   position: absolute;
   inset: 0;
   border-radius: 24px;
-  padding: 2.5px;
+  padding: 1px;
+  /* Thinner default border */
   /* Use a larger background for animation flow */
   background: linear-gradient(135deg, rgba(34, 211, 238, 0.6), rgba(192, 132, 252, 0.6), rgba(244, 114, 182, 0.6), rgba(34, 211, 238, 0.6));
   background-size: 300% 300%;
@@ -173,7 +199,10 @@ body::after {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s, padding 0.3s;
+  /* Animate padding too */
+  opacity: 0;
+  /* Hidden by default */
 }
 
 /* Hover Animation Keyframes */
@@ -209,6 +238,9 @@ body::after {
   background: linear-gradient(135deg, #22d3ee, #c084fc, #f472b6, #22d3ee);
   background-size: 300% 300%;
   animation: border-flow 3s ease infinite;
+  opacity: 1;
+  padding: 2.5px;
+  /* Thicken on hover */
 }
 
 /* Pill shape variant for search bar */
@@ -286,6 +318,7 @@ h3 {
   border-color: rgba(255, 255, 255, 0.3);
   transform: translateY(-1px);
   box-shadow: 0 0 20px rgba(192, 132, 252, 0.15);
+  color: white !important;
 }
 
 .btn-primary:active {
@@ -321,4 +354,22 @@ input:focus {
 
 input::placeholder {
   color: var(--text-muted);
+}
+
+/* Favorite Panel Background */
+.glass-panel-gradient.is-favorite {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(192, 132, 252, 0.15));
+}
+
+/* Favorite Indicator Style */
+.glass-panel-gradient.is-favorite::before {
+  opacity: 1 !important;
+  padding: 1px;
+  /* Keep thin for Favorites by default */
+  background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+}
+
+.glass-panel-gradient.is-favorite:hover::before {
+  padding: 2.5px;
+  /* Thicken on hover even for favorites */
 }
