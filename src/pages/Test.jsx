@@ -22,6 +22,7 @@ export default function Test() {
     // Retry State
     const [isRetryMode, setIsRetryMode] = useState(false);
     const [retrySourceWords, setRetrySourceWords] = useState([]); // Words to use for retry
+    const [refreshKey, setRefreshKey] = useState(0); // Force re-run for Retry All
 
     useEffect(() => {
         // If in Retry Mode, do NOT fetch from API. Use retrySourceWords.
@@ -99,7 +100,7 @@ export default function Test() {
             resetTest();
         }
         load();
-    }, [dayId, isRandom, isRetryMode]);
+    }, [dayId, isRandom, isRetryMode, refreshKey]);
 
     const resetTest = () => {
         setCurrentIndex(0);
@@ -178,8 +179,7 @@ export default function Test() {
     const handleRetryAll = () => {
         setIsRetryMode(false);
         setRetrySourceWords([]);
-        // Force reload by triggering effect (isRetryMode change helps, but we might need explicit fetch call usage next render)
-        // Effect will run because isRetryMode changed to false.
+        setRefreshKey(prev => prev + 1);
     };
 
     if (words.length === 0) return <div className="glass-panel" style={{ margin: '2rem', padding: '2rem', textAlign: 'center' }}>Loading...</div>;
