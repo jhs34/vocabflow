@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, XCircle, RotateCcw, Shuffle, ListOrdered, Check, X, AlertCircle } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Shuffle, ListOrdered, Check, X, AlertCircle } from 'lucide-react';
 import { fetchLessonData, checkAnswer } from '../utils/vocabLogic';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
+import TestCard from '../components/TestCard';
 
 export default function Test() {
     const { dayId } = useParams();
@@ -13,7 +14,6 @@ export default function Test() {
     const [feedback, setFeedback] = useState(null); // 'correct' | 'incorrect' | null
     const [score, setScore] = useState(0);
     const [isFinished, setIsFinished] = useState(false);
-    const inputRef = useRef(null);
     const [isRandom, setIsRandom] = useState(() => localStorage.getItem('vocab_sort_mode') !== 'sequential');
 
     // Store detailed results for review
@@ -118,17 +118,6 @@ export default function Test() {
         setIsRandom(newMode);
         localStorage.setItem('vocab_sort_mode', newMode ? 'random' : 'sequential');
     };
-
-    useEffect(() => {
-        if (inputRef.current) inputRef.current.focus();
-    }, [currentIndex, isFinished]);
-
-    // Focus input after feedback is cleared (next question)
-    useEffect(() => {
-        if (feedback === null && inputRef.current) {
-            inputRef.current.focus();
-        }
-    }, [feedback]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -321,94 +310,20 @@ export default function Test() {
                 </span>
             </div>
 
-            <AnimatePresence mode="popLayout">
-                <motion.div
-                    key={currentIndex}
-                    initial={{ opacity: 0, x: 50, filter: 'blur(10px)' }}
-                    animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                    exit={{ opacity: 0, x: -50, filter: 'blur(10px)' }}
-                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                    className="glass-panel-gradient"
-                    style={{ padding: '3rem 2rem', textAlign: 'center', position: 'relative', willChange: 'transform, opacity' }}
-                    onAnimationComplete={() => inputRef.current?.focus()}
-                >
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '1rem' }}>Translate this word:</p>
-                    <h2 className="text-gradient-multi" style={{ fontSize: 'clamp(2rem, 8vw, 3rem)', fontWeight: '800', marginBottom: '3rem', wordBreak: 'break-word', overflowWrap: 'anywhere', lineHeight: 1.2 }}>{currentWord.word}</h2>
-
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '400px', margin: '0 auto' }}>
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            value={userInput}
-                            onChange={(e) => setUserInput(e.target.value)}
-                            disabled={feedback !== null}
-                            placeholder="Type meaning (Korean)"
-                            style={{
-                                textAlign: 'center',
-                                fontSize: '1.3rem',
-                                padding: '1rem',
-                                borderRadius: '16px',
-                                background: 'rgba(0,0,0,0.3)',
-                                borderColor: feedback === 'correct' ? 'var(--success)' : feedback === 'incorrect' ? 'var(--error)' : 'rgba(255,255,255,0.1)',
-                                boxShadow: feedback ? `0 0 20px ${feedback === 'correct' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}` : 'none',
-                                transition: 'all 0.3s'
-                            }}
-                            autoComplete="off"
-                            autoCorrect="off"
-                            autoCapitalize="off"
-                            spellCheck="false"
-                            name="vocab-test-input-no-autofill"
-                            data-lpignore="true" // Ignore LastPass
-                            data-form-type="other" // Hint to browsers
-                            data-1p-ignore="true" // Ignore 1Password
-                            enterKeyHint="done"
-                            inputMode="text"
-                            autoFocus
-                        />
-
-                        {feedback === null ? (
-                            <button type="submit" className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}>Submit Answer</button>
-                        ) : (
-                            <motion.div
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-                            >
-                                {feedback === 'correct' ? (
-                                    <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                                        <div style={{ color: 'var(--success)', fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                            <CheckCircle /> Correct!
-                                        </div>
-                                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
-                                            Answer: <span style={{ color: 'white' }}>{currentWord.answer_list[0]}</span>
-                                            {currentWord.answer_list.length > 1 && <span style={{ fontSize: '0.9em', opacity: 0.8 }}> (also: {currentWord.answer_list.slice(1).join(', ')})</span>}
-                                        </p>
-                                    </div>
-                                ) : (
-                                    <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                                        <div style={{ color: 'var(--error)', fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                            <XCircle /> Incorrect
-                                        </div>
-                                        <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                                            Answer: <span style={{ color: 'white', fontWeight: 'bold' }}>{currentWord.answer_list[0]}</span>
-                                            {currentWord.answer_list.length > 1 && <span style={{ fontSize: '0.8em' }}> (also: {currentWord.answer_list.slice(1).join(', ')})</span>}
-                                        </p>
-                                    </div>
-                                )}
-                                <button
-                                    type="button"
-                                    className="btn-primary"
-                                    onClick={handleNext}
-                                    autoFocus
-                                    style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
-                                >
-                                    {currentIndex < words.length - 1 ? 'Next Question' : 'Finish Test'}
-                                </button>
-                            </motion.div>
-                        )}
-                    </form>
-                </motion.div>
-            </AnimatePresence>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gridTemplateRows: '1fr', position: 'relative' }}>
+                <AnimatePresence>
+                    <TestCard
+                        key={currentIndex}
+                        word={currentWord}
+                        feedback={feedback}
+                        userInput={userInput}
+                        setUserInput={setUserInput}
+                        onSubmit={handleSubmit}
+                        onNext={handleNext}
+                        isLastQuestion={currentIndex === words.length - 1}
+                    />
+                </AnimatePresence>
+            </div>
         </div>
     );
 }
