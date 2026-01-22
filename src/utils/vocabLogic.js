@@ -81,7 +81,7 @@ export async function fetchLessonData(dayId) {
 }
 
 // 가용 Day 목록을 스캔하는 함수
-export async function getAvailableDays(maxDays = 100) {
+export async function getAvailableDays(maxDays = 50) {
     const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
     const available = [];
 
@@ -124,7 +124,7 @@ export async function searchAllWords(query) {
     // 성능을 위해 일단 최대 50일 정도만 검색하거나, getAvailableDays 결과를 활용해야 함.
     // 여기서는 사용자가 검색 버튼을 누르면 getAvailableDays를 먼저 호출한다고 가정하거나,
     // 직접 1~60 정도를 찔러봅니다.
-    const days = await getAvailableDays(60);
+    const days = await getAvailableDays(50);
 
     const results = [];
     const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;

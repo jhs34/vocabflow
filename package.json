@@ -1,9 +1,9 @@
 {
-  "name": "vocab",
+  "name": "vocabflow",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://jhs34.github.io/vocab/",
+  "homepage": "https://jhs34.github.io/vocabflow/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

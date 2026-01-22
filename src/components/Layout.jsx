@@ -1,7 +1,31 @@
 import { Outlet, Link } from 'react-router-dom';
-import { BookOpen, Home, Github } from 'lucide-react';
+import { BookOpen, Home, Maximize, Minimize } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export default function Layout() {
+    const [isFullScreen, setIsFullScreen] = useState(false);
+
+    useEffect(() => {
+        function onFullscreenChange() {
+            setIsFullScreen(Boolean(document.fullscreenElement));
+        }
+
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+    }, []);
+
+    const toggleFullScreen = () => {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch((e) => {
+                console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    };
+
     return (
         <div className="container" style={{ paddingTop: '1.5rem' }}>
             <nav className="glass-panel" style={{
@@ -22,7 +46,22 @@ export default function Layout() {
                     <span className="text-gradient" style={{ fontSize: '1.25rem', fontWeight: '800', letterSpacing: '-0.5px' }}>VocabFlow</span>
                 </Link>
 
-                <div style={{ display: 'flex', gap: '1rem' }}>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    <button
+                        onClick={toggleFullScreen}
+                        style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'white',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: 0
+                        }}
+                        title={isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                    >
+                        {isFullScreen ? <Minimize size={24} /> : <Maximize size={24} />}
+                    </button>
                     <a href="https://jhs34.github.io/" target="_blank" rel="noreferrer" style={{ color: 'white', transition: 'color 0.2s', display: 'flex', alignItems: 'center' }}>
                         <Home size={24} />
                     </a>

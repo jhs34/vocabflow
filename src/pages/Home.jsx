@@ -325,12 +325,15 @@ export default function Home() {
                                         padding: '1rem',
                                         display: 'flex',
                                         flexDirection: 'column',
-                                        gap: '1.5rem',
+                                        gap: '1rem',
                                         cursor: 'default',
                                         textAlign: 'center',
-                                        aspectRatio: '0.85',
+                                        aspectRatio: '1 / 1',
                                         justifyContent: 'center',
-                                        position: 'relative' // For absolute positioning of Star
+                                        position: 'relative', // For absolute positioning of Star
+                                        userSelect: 'none',
+                                        WebkitUserSelect: 'none',
+                                        WebkitTouchCallout: 'none'
                                     }}
                                 >
                                     {/* Favorite Star Indicator */}
