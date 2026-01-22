@@ -354,6 +354,15 @@ export default function Test() {
                                 transition: 'all 0.3s'
                             }}
                             autoComplete="off"
+                            autoCorrect="off"
+                            autoCapitalize="off"
+                            spellCheck="false"
+                            name="vocab-test-input-no-autofill"
+                            data-lpignore="true" // Ignore LastPass
+                            data-form-type="other" // Hint to browsers
+                            data-1p-ignore="true" // Ignore 1Password
+                            enterKeyHint="done"
+                            inputMode="text"
                             autoFocus
                         />
 

@@ -251,6 +251,14 @@ export default function Home() {
                                 padding: '1rem',
                                 boxShadow: 'none'
                             }}
+                            autoComplete="off"
+                            autoCorrect="off"
+                            autoCapitalize="off"
+                            spellCheck="false"
+                            name="vocab-search-input"
+                            enterKeyHint="search"
+                            inputMode="search"
+                            data-1p-ignore="true"
                         />
                         {searchQuery && (
                             <button type="button" onClick={clearSearch} style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', paddingRight: '1rem', display: 'flex' }}>
