@@ -1,6 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
 import { BookOpen, Home, Maximize, Minimize } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import VocabLogo from './VocabLogo';
 
 export default function Layout() {
     const [isFullScreen, setIsFullScreen] = useState(false);
@@ -29,7 +30,7 @@ export default function Layout() {
     return (
         <div className="container" style={{ paddingTop: '1.5rem' }}>
             <nav className="glass-panel" style={{
-                padding: '0.75rem 1.5rem',
+                padding: '0.5rem 1.5rem',
                 marginBottom: '2rem',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -39,11 +40,9 @@ export default function Layout() {
                 margin: '0 auto 2rem auto',
                 border: '1.5px solid rgba(255, 255, 255, 0.9)'
             }}>
-                <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ background: 'linear-gradient(135deg, #8b5cf6, #38bdf8)', padding: '0.5rem', borderRadius: '50%', display: 'flex' }}>
-                        <BookOpen color="white" size={20} strokeWidth={2.5} />
-                    </div>
-                    <span className="text-gradient" style={{ fontSize: '1.25rem', fontWeight: '800', letterSpacing: '-0.5px' }}>VocabFlow</span>
+                <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', height: '100%', gap: '0rem' }}>
+                    <div style={{ background: 'linear-gradient(135deg, #8b5cf6, #38bdf8)', width: '28px', height: '28px', borderRadius: '50%', marginLeft: '-5px' }}></div>
+                    <VocabLogo style={{ height: '37px', width: '148px', transform: 'translateY(0px)' }} />
                 </Link>
 
                 <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Book, GraduationCap, Search, X, Star, Bookmark } from 'lucide-react';
 import { getAvailableDays, searchAllWords } from '../utils/vocabLogic';
 import { motion, AnimatePresence } from 'framer-motion';
+import VocabLogo from '../components/VocabLogo';
 
 export default function Home() {
     const [availableDays, setAvailableDays] = useState([]);
@@ -173,21 +174,22 @@ export default function Home() {
 
     return (
         <div style={{ paddingBottom: '2rem' }}>
-            <header style={{ marginBottom: '4rem', textAlign: 'center' }}>
-                <motion.h1
-                    initial={{ opacity: 0, y: -10, filter: 'blur(10px)' }}
-                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            <header style={{ marginBottom: '1rem', textAlign: 'center' }}>
+                <VocabLogo
+                    style={{
+                        width: 'min(90vw, 650px)',
+                        aspectRatio: '3/1',
+                        margin: '-2.5rem auto -3rem auto',
+                    }}
+                    initial={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}
+                    animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
                     transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    className="text-gradient-multi"
-                    style={{ fontSize: '3.5rem', fontWeight: '800', marginBottom: '1rem', letterSpacing: '-0.03em' }}
-                >
-                    Select Your Lesson
-                </motion.h1>
+                />
                 <motion.p
                     initial={{ opacity: 0, y: 10, filter: 'blur(5px)' }}
                     animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
                     transition={{ delay: 0.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                    style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '3rem' }}
+                    style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '2rem' }}
                 >
                     Choose a day to start studying.
                 </motion.p>
