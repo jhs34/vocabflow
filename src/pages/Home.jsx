@@ -307,7 +307,7 @@ export default function Home() {
                     {filteredDays.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '2rem' }} className="glass-panel">
                             {showFavoritesOnly
-                                ? "No favorite lessons yet. Long press a day to add it!"
+                                ? "No favorite lessons yet. Click the star to add it!"
                                 : (searchQuery ? `Day ${searchQuery} not found.` : "No lesson files found.")}
                         </div>
                     ) : (
@@ -324,30 +324,46 @@ export default function Home() {
                                     variants={item}
                                     className={`glass-panel-gradient ${favorites.includes(day) ? 'is-favorite' : ''}`}
 
-                                    // Long Press Events
-                                    onMouseDown={() => startPress(day)}
-                                    onMouseUp={cancelPress}
-                                    onMouseLeave={cancelPress}
-                                    onTouchStart={() => startPress(day)}
-                                    onTouchEnd={cancelPress}
-
                                     style={{
-                                        padding: '1rem',
+                                        padding: '0.75rem',
                                         display: 'flex',
                                         flexDirection: 'column',
-                                        gap: '1rem',
+                                        gap: '0.5rem',
                                         cursor: 'default',
                                         textAlign: 'center',
                                         aspectRatio: '1 / 1',
                                         justifyContent: 'center',
-                                        position: 'relative', // For absolute positioning of Star
+                                        position: 'relative',
                                         userSelect: 'none',
                                         WebkitUserSelect: 'none',
                                         WebkitTouchCallout: 'none'
                                     }}
                                 >
-                                    {/* Favorite Star Indicator */}
-                                    {/* Favorite Indicator (handled by CSS class) */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleFavorite(day);
+                                        }}
+                                        style={{
+                                            position: 'absolute',
+                                            top: '10px',
+                                            right: '10px',
+                                            background: 'transparent',
+                                            border: 'none',
+                                            cursor: 'pointer',
+                                            padding: '5px',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            zIndex: 10
+                                        }}
+                                    >
+                                        <Star
+                                            size={20}
+                                            color={favorites.includes(day) ? "var(--accent-purple)" : "rgba(255,255,255,0.3)"}
+                                            fill={favorites.includes(day) ? "var(--accent-purple)" : "none"}
+                                        />
+                                    </button>
 
                                     <div style={{ fontSize: '1.4rem', fontWeight: '800', color: 'white' }}>Day <span style={{ color: 'var(--accent-purple)' }}>{day}</span></div>
 
@@ -368,38 +384,41 @@ export default function Home() {
                         </motion.div>
                     )}
                 </>
-            )}
+            )
+            }
 
             {/* Favorite Floating Action Button */}
-            {!isSearching && searchResults === null && (
-                <motion.button
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
-                    style={{
-                        position: 'fixed',
-                        bottom: '2rem',
-                        left: '2rem',
-                        zIndex: 100,
-                        width: '3.5rem',
-                        height: '3.5rem',
-                        borderRadius: '50%',
-                        background: showFavoritesOnly ? 'var(--accent-purple)' : 'rgba(30, 41, 59, 0.8)',
-                        color: 'white',
-                        border: '1px solid var(--glass-border)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: 'pointer',
-                        backdropFilter: 'blur(10px)'
-                    }}
-                >
-                    <Star size={24} fill={showFavoritesOnly ? "white" : "none"} />
-                </motion.button>
-            )}
-        </div>
+            {
+                !isSearching && searchResults === null && (
+                    <motion.button
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+                        style={{
+                            position: 'fixed',
+                            bottom: '2rem',
+                            left: '2rem',
+                            zIndex: 100,
+                            width: '3.5rem',
+                            height: '3.5rem',
+                            borderRadius: '50%',
+                            background: showFavoritesOnly ? 'var(--accent-purple)' : 'rgba(30, 41, 59, 0.8)',
+                            color: 'white',
+                            border: '1px solid var(--glass-border)',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            backdropFilter: 'blur(10px)'
+                        }}
+                    >
+                        <Star size={24} fill={showFavoritesOnly ? "white" : "none"} />
+                    </motion.button>
+                )
+            }
+        </div >
     );
 }
