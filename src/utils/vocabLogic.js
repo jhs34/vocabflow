@@ -65,6 +65,12 @@ export function processWordData(wordData) {
 }
 
 export async function fetchLessonData(dayId) {
+    // Validate dayId to prevent path traversal
+    if (!/^\d+$/.test(String(dayId))) {
+        console.warn(`Invalid dayId: ${dayId}`);
+        return [];
+    }
+
     try {
         const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
         const response = await fetch(`${baseUrl}words/day${dayId}.json`);
