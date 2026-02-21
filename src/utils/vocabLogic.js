@@ -40,14 +40,14 @@ export function checkAnswer(userInput, allowedAnswers) {
         s = s.replace(/[~·.]/g, '');
         // 3. 공백 제거
         s = s.replace(/\s+/g, '');
-        return s;
+        return s.toLowerCase();
     };
 
     const cleanInput = normalize(userInput);
 
     // 정답 목록 중 하나라도 일치하는지 확인
     return allowedAnswers.some(answer => {
-        const cleanAnswer = answer.replace(/\s+/g, ''); // 정답은 이미 parseAnswerList를 거쳐서 특수문자는 없지만 공백은 있을 수 있음
+        const cleanAnswer = answer.replace(/\s+/g, '').toLowerCase(); // 정답은 이미 parseAnswerList를 거쳐서 특수문자는 없지만 공백은 있을 수 있음
         return cleanInput === cleanAnswer;
     });
 }
