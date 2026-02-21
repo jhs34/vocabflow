@@ -30,6 +30,8 @@ export function parseAnswerList(rawString) {
 // 사용자의 입력이 정답인지 확인하는 함수
 export function checkAnswer(userInput, allowedAnswers) {
     if (!userInput || !allowedAnswers) return false;
+    if (typeof userInput !== 'string') return false;
+    if (!Array.isArray(allowedAnswers)) return false;
 
     // 입력값 정규화 함수
     const normalize = (str) => {
