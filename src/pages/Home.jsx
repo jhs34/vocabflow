@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Book, GraduationCap, Search, X, Star, Bookmark } from 'lucide-react';
 import { getAvailableDays, searchAllWords } from '../utils/vocabLogic';
@@ -16,7 +16,6 @@ export default function Home() {
     const [favorites, setFavorites] = useState([]);
     const [isFavoritesLoaded, setIsFavoritesLoaded] = useState(false);
     const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-    const longPressTimer = useRef(null);
 
     // Load Favorites from LocalStorage on mount
     useEffect(() => {
@@ -102,19 +101,6 @@ export default function Home() {
 
         // Visual feedback (optional vibration)
         if (navigator.vibrate) navigator.vibrate(50);
-    };
-
-    const startPress = (day) => {
-        longPressTimer.current = setTimeout(() => {
-            toggleFavorite(day);
-        }, 600); // 800ms -> 600ms for better responsiveness
-    };
-
-    const cancelPress = () => {
-        if (longPressTimer.current) {
-            clearTimeout(longPressTimer.current);
-            longPressTimer.current = null;
-        }
     };
 
     // 렌더링할 Day 리스트 계산 (검색어 + 즐겨찾기 필터)
