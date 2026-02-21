@@ -167,7 +167,7 @@ export async function searchAllWords(query) {
                 }
             });
         } catch (e) {
-            // ignore error
+            console.error("Error searching words:", e);
         }
     }));
 
