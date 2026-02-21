@@ -1,7 +1,7 @@
 import { useState, useEffect, memo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Layers, List as ListIcon, Eye, EyeOff, Shuffle, ListOrdered, Bookmark } from 'lucide-react';
-import { fetchLessonData } from '../utils/vocabLogic';
+import { fetchLessonData, shuffleArray } from '../utils/vocabLogic';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Separate Flashcard Component to isolate Flip State
@@ -208,11 +208,7 @@ export default function Study() {
             let processed = [...originalData];
 
             if (isRandom) {
-                // Fisher-Yates Shuffle
-                for (let i = processed.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [processed[i], processed[j]] = [processed[j], processed[i]];
-                }
+                processed = shuffleArray(processed);
             } else {
                 // Sort by ID
                 processed.sort((a, b) => a.id - b.id);

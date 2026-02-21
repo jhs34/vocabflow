@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Shuffle, ListOrdered, Check, X, AlertCircle } from 'lucide-react';
-import { fetchLessonData, checkAnswer } from '../utils/vocabLogic';
+import { fetchLessonData, checkAnswer, shuffleArray } from '../utils/vocabLogic';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import TestCard from '../components/TestCard';
@@ -29,11 +29,7 @@ export default function Test() {
         if (isRetryMode) {
             let processed = [...retrySourceWords];
             if (isRandom) {
-                // Shuffle logic duplicated
-                for (let i = processed.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [processed[i], processed[j]] = [processed[j], processed[i]];
-                }
+                processed = shuffleArray(processed);
             } else {
                 processed.sort((a, b) => a.id - b.id);
             }
@@ -86,11 +82,7 @@ export default function Test() {
             }
 
             if (isRandom) {
-                // Fisher-Yates Shuffle
-                for (let i = processed.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [processed[i], processed[j]] = [processed[j], processed[i]];
-                }
+                processed = shuffleArray(processed);
             } else {
                 // Sort by ID
                 processed.sort((a, b) => a.id - b.id);
