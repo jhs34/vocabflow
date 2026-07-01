@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { checkAnswer, parseAnswerList } from '../src/utils/vocabLogic.js';
+import { checkAnswer, parseAnswerList, processWordData } from '../src/utils/vocabLogic.js';
 
 console.log('Running tests for vocabLogic...');
 
@@ -67,4 +67,37 @@ test('checkAnswer: should handle empty input', () => {
 
 test('checkAnswer: should handle empty allowedAnswers', () => {
     assert.strictEqual(checkAnswer('apple', []), false);
+});
+
+// Tests for processWordData
+test('processWordData: should map word data and add answer_list', () => {
+    const input = [
+        { word: 'apple', raw_meaning: '사과, (열매)' },
+        { word: 'banana', raw_meaning: '바나나' }
+    ];
+    const expected = [
+        { word: 'apple', raw_meaning: '사과, (열매)', answer_list: ['사과'] },
+        { word: 'banana', raw_meaning: '바나나', answer_list: ['바나나'] }
+    ];
+    assert.deepStrictEqual(processWordData(input), expected);
+});
+
+test('processWordData: should preserve existing properties', () => {
+    const input = [
+        { word: 'apple', raw_meaning: '사과', id: 1, custom: 'data' }
+    ];
+    const result = processWordData(input);
+    assert.strictEqual(result[0].id, 1);
+    assert.strictEqual(result[0].custom, 'data');
+    assert.deepStrictEqual(result[0].answer_list, ['사과']);
+});
+
+test('processWordData: should handle empty array', () => {
+    assert.deepStrictEqual(processWordData([]), []);
+});
+
+test('processWordData: should handle non-array input', () => {
+    assert.deepStrictEqual(processWordData(null), []);
+    assert.deepStrictEqual(processWordData(undefined), []);
+    assert.deepStrictEqual(processWordData({}), []);
 });
