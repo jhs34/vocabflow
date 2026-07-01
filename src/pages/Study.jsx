@@ -1,7 +1,7 @@
 import { useState, useEffect, memo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Layers, List as ListIcon, Eye, EyeOff, Shuffle, ListOrdered, Bookmark } from 'lucide-react';
-import { fetchLessonData, shuffleArray } from '../utils/vocabLogic';
+import { fetchLessonData, shuffleArray, safeParseJSON } from '../utils/vocabLogic';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Separate Flashcard Component to isolate Flip State
@@ -170,9 +170,7 @@ export default function Study() {
 
     useEffect(() => {
         const stored = localStorage.getItem('vocab_bookmarks');
-        if (stored) {
-            setBookmarks(JSON.parse(stored));
-        }
+        setBookmarks(safeParseJSON(stored, []));
     }, []);
 
     const toggleBookmark = (wordId) => {

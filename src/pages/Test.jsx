@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, RotateCcw, Shuffle, ListOrdered, Check, X, AlertCircle } from 'lucide-react';
-import { fetchLessonData, checkAnswer, shuffleArray } from '../utils/vocabLogic';
+import { fetchLessonData, checkAnswer, shuffleArray, safeParseJSON } from '../utils/vocabLogic';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import TestCard from '../components/TestCard';
@@ -48,7 +48,7 @@ export default function Test() {
             let processed = [];
 
             if (dayId === 'bookmark') {
-                const stored = JSON.parse(localStorage.getItem('vocab_bookmarks') || '[]');
+                const stored = safeParseJSON(localStorage.getItem('vocab_bookmarks'), []);
                 if (stored.length === 0) {
                     setWords([]);
                     return;

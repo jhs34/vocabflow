@@ -1,7 +1,7 @@
 import { useState, useEffect, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ChevronLeft, ChevronRight, Layers, List as ListIcon, Eye, EyeOff, Shuffle, ListOrdered, Bookmark, Trash2, GraduationCap } from 'lucide-react';
-import { fetchLessonData } from '../utils/vocabLogic';
+import { fetchLessonData, safeParseJSON } from '../utils/vocabLogic';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Flashcard for Review (Reused)
@@ -149,7 +149,7 @@ export default function Review() {
             setLoading(true);
             setErrorMsg(null);
             try {
-                const stored = JSON.parse(localStorage.getItem('vocab_bookmarks') || '[]');
+                const stored = safeParseJSON(localStorage.getItem('vocab_bookmarks'), []);
 
                 if (stored.length === 0) {
                     setWords([]);
@@ -224,7 +224,7 @@ export default function Review() {
             setCurrentIndex(0);
         } else {
             const keyToRemove = `${itemToDelete.daySource}-${itemToDelete.id}`;
-            const stored = JSON.parse(localStorage.getItem('vocab_bookmarks') || '[]');
+            const stored = safeParseJSON(localStorage.getItem('vocab_bookmarks'), []);
             const newBookmarks = stored.filter(k => k !== keyToRemove);
             localStorage.setItem('vocab_bookmarks', JSON.stringify(newBookmarks));
 
