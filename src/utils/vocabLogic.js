@@ -80,6 +80,29 @@ export function shuffleArray(array) {
     return shuffled;
 }
 
+/**
+ * Safe JSON parsing utility for localStorage or any string input
+ * @param {string|null} jsonString - The JSON string to parse
+ * @param {any} defaultValue - Value to return if parsing fails or input is null
+ * @returns {any} - Parsed object or defaultValue
+ */
+export function safeParseJSON(jsonString, defaultValue = []) {
+    if (!jsonString) return defaultValue;
+    try {
+        const parsed = JSON.parse(jsonString);
+
+        // If default value is an array, ensure parsed result is also an array
+        if (Array.isArray(defaultValue) && !Array.isArray(parsed)) {
+            return defaultValue;
+        }
+
+        return parsed;
+    } catch (e) {
+        console.error("Error parsing JSON:", e);
+        return defaultValue;
+    }
+}
+
 export async function fetchLessonData(dayId) {
     // Validate dayId to prevent path traversal
     if (!/^\d+$/.test(String(dayId))) {

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { checkAnswer, parseAnswerList } from '../src/utils/vocabLogic.js';
+import { checkAnswer, parseAnswerList, safeParseJSON } from '../src/utils/vocabLogic.js';
 
 console.log('Running tests for vocabLogic...');
 
@@ -67,4 +67,30 @@ test('checkAnswer: should handle empty input', () => {
 
 test('checkAnswer: should handle empty allowedAnswers', () => {
     assert.strictEqual(checkAnswer('apple', []), false);
+});
+
+// Tests for safeParseJSON
+test('safeParseJSON: should parse valid JSON', () => {
+    assert.deepStrictEqual(safeParseJSON('["apple", "banana"]'), ['apple', 'banana']);
+    assert.deepStrictEqual(safeParseJSON('{"a": 1}', {}), { a: 1 });
+});
+
+test('safeParseJSON: should return default value for invalid JSON', () => {
+    assert.deepStrictEqual(safeParseJSON('invalid json', []), []);
+    assert.deepStrictEqual(safeParseJSON('{unquoted: key}', {}), {});
+});
+
+test('safeParseJSON: should return default value for null/undefined/empty input', () => {
+    assert.deepStrictEqual(safeParseJSON(null, ['default']), ['default']);
+    assert.deepStrictEqual(safeParseJSON(undefined, []), []);
+    assert.deepStrictEqual(safeParseJSON('', []), []);
+});
+
+test('safeParseJSON: should ensure array if default is array', () => {
+    assert.deepStrictEqual(safeParseJSON('{"not": "an array"}', []), []);
+});
+
+test('safeParseJSON: should handle non-array default values', () => {
+    assert.strictEqual(safeParseJSON('123', 0), 123);
+    assert.strictEqual(safeParseJSON('invalid', 0), 0);
 });

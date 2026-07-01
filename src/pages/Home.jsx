@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Book, GraduationCap, Search, X, Star, Bookmark } from 'lucide-react';
-import { getAvailableDays, searchAllWords } from '../utils/vocabLogic';
+import { getAvailableDays, searchAllWords, safeParseJSON } from '../utils/vocabLogic';
 import { motion, AnimatePresence } from 'framer-motion';
 import VocabLogo from '../components/VocabLogo';
 
@@ -19,16 +19,9 @@ export default function Home() {
 
     // Load Favorites from LocalStorage on mount
     useEffect(() => {
-        try {
-            const stored = localStorage.getItem('my_vocab_favorites');
-            if (stored) {
-                setFavorites(JSON.parse(stored));
-            }
-        } catch (e) {
-            console.error("Failed to load favorites", e);
-        } finally {
-            setIsFavoritesLoaded(true);
-        }
+        const stored = localStorage.getItem('my_vocab_favorites');
+        setFavorites(safeParseJSON(stored, []));
+        setIsFavoritesLoaded(true);
     }, []);
 
     // Save Favorites to LocalStorage whenever it changes
