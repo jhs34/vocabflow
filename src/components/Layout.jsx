@@ -1,18 +1,33 @@
-import { Outlet, Link } from 'react-router-dom';
-import { BookOpen, Home, Maximize, Minimize } from 'lucide-react';
+import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Maximize, Minimize, ArrowUpRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import VocabLogo from './VocabLogo';
+import { getStoredBookmarks } from '../utils/vocabLogic';
+import { FLUID_SPRING, EASE_OUT } from '../utils/motion';
 
 export default function Layout() {
+    const location = useLocation();
     const [isFullScreen, setIsFullScreen] = useState(false);
+    const [bookmarkCount, setBookmarkCount] = useState(() => getStoredBookmarks().length);
 
     useEffect(() => {
         function onFullscreenChange() {
             setIsFullScreen(Boolean(document.fullscreenElement));
         }
 
+        function syncBookmarks() {
+            setBookmarkCount(getStoredBookmarks().length);
+        }
+
         document.addEventListener('fullscreenchange', onFullscreenChange);
-        return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+        window.addEventListener('bookmarks-updated', syncBookmarks);
+        window.addEventListener('storage', syncBookmarks);
+        return () => {
+            document.removeEventListener('fullscreenchange', onFullscreenChange);
+            window.removeEventListener('bookmarks-updated', syncBookmarks);
+            window.removeEventListener('storage', syncBookmarks);
+        };
     }, []);
 
     const toggleFullScreen = () => {
@@ -20,60 +35,105 @@ export default function Layout() {
             document.documentElement.requestFullscreen().catch((e) => {
                 console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
             });
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen();
         }
     };
 
+    const isReviewActive = location.pathname.startsWith('/review') || location.pathname === '/test/bookmark';
+    const isHomeActive = !isReviewActive;
+
     return (
-        <div className="container" style={{ paddingTop: '1.5rem' }}>
-            <nav className="glass-panel" style={{
-                padding: '0.5rem 1.5rem',
-                marginBottom: '2rem',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                borderRadius: '9999px',
-                width: '100%',
-                margin: '0 auto 2rem auto',
-                border: '1.5px solid rgba(255, 255, 255, 0.9)'
-            }}>
-                <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', height: '100%', gap: '0rem' }}>
-                    <div style={{ background: 'linear-gradient(135deg, #8b5cf6, #38bdf8)', width: '28px', height: '28px', borderRadius: '50%', marginLeft: '-5px' }}></div>
-                    <VocabLogo style={{ height: '37px', width: '148px', transform: 'translateY(0px)' }} />
-                </Link>
-
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <button
-                        onClick={toggleFullScreen}
+        <div className="app-shell">
+            <header className="top-bar">
+                <div className="shell-inner top-bar-inner">
+                    <Link
+                        to="/"
+                        aria-label="VocabFlow 홈"
                         style={{
-                            background: 'transparent',
-                            border: 'none',
-                            color: 'white',
-                            cursor: 'pointer',
-                            display: 'flex',
+                            textDecoration: 'none',
+                            color: 'var(--text-primary)',
+                            display: 'inline-flex',
                             alignItems: 'center',
-                            padding: 0
+                            flexShrink: 0
                         }}
-                        title={isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
                     >
-                        {isFullScreen ? <Minimize size={24} /> : <Maximize size={24} />}
-                    </button>
-                    <a href="https://jhs34.github.io/" target="_blank" rel="noreferrer" style={{ color: 'white', transition: 'color 0.2s', display: 'flex', alignItems: 'center' }}>
-                        <Home size={24} />
-                    </a>
-                </div>
-            </nav>
+                        <VocabLogo style={{ height: '22px', width: '132px' }} />
+                    </Link>
 
-            <main style={{ minHeight: '80vh' }}>
-                <Outlet />
+                    <nav className="nav-links" aria-label="주요 메뉴">
+                        <Link to="/" className={`nav-link ${isHomeActive ? 'is-active' : ''}`}>
+                            <span>단어장</span>
+                            {isHomeActive && (
+                                <motion.span
+                                    layoutId="top-nav-underline"
+                                    className="nav-underline"
+                                    transition={FLUID_SPRING}
+                                />
+                            )}
+                        </Link>
+                        <Link to="/review" className={`nav-link ${isReviewActive ? 'is-active' : ''}`}>
+                            <span>북마크 노트</span>
+                            <AnimatePresence mode="popLayout" initial={false}>
+                                {bookmarkCount > 0 && (
+                                    <motion.span
+                                        key={bookmarkCount}
+                                        initial={{ opacity: 0, y: -6 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 6 }}
+                                        transition={{ duration: 0.24, ease: EASE_OUT }}
+                                        className="mono"
+                                        style={{ color: 'var(--text-muted)', fontSize: '12px' }}
+                                    >
+                                        · {bookmarkCount}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                            {isReviewActive && (
+                                <motion.span
+                                    layoutId="top-nav-underline"
+                                    className="nav-underline"
+                                    transition={FLUID_SPRING}
+                                />
+                            )}
+                        </Link>
+                    </nav>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                        <a
+                            href="https://jhs34.github.io/"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="nav-link hide-mobile"
+                            style={{ borderBottom: 'none' }}
+                        >
+                            <span>블로그</span>
+                            <ArrowUpRight size={16} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />
+                        </a>
+                        <button
+                            type="button"
+                            onClick={toggleFullScreen}
+                            className="icon-btn"
+                            title={isFullScreen ? "전체화면 종료" : "전체화면 전환"}
+                            aria-label={isFullScreen ? "전체화면 종료" : "전체화면 전환"}
+                        >
+                            {isFullScreen ? <Minimize size={16} strokeWidth={1.5} /> : <Maximize size={16} strokeWidth={1.5} />}
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <main style={{ flex: 1, width: '100%' }}>
+                <div className="shell-inner">
+                    <Outlet />
+                </div>
             </main>
 
-            <footer style={{ marginTop: '4rem', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                <p>© {new Date().getFullYear()} VocabFlow. Premium Learning Experience. Made with Antigravity</p>
-                <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', opacity: 0.8 }}>고등부 화이팅</p>
+            <footer style={{ borderTop: '1px solid var(--border)', marginTop: '64px', padding: '24px 0' }}>
+                <div className="shell-inner" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', flexWrap: 'wrap', color: 'var(--text-muted)', fontSize: '13px' }}>
+                    <span>© {new Date().getFullYear()} VocabFlow · 고등 필수 영단어</span>
+                    <span>고등부 화이팅</span>
+                </div>
             </footer>
         </div>
     );

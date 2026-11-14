@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { MotionConfig } from 'framer-motion';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Study from './pages/Study';
@@ -7,14 +8,16 @@ import Review from './pages/Review';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="study/:dayId" element={<Study />} />
-        <Route path="test/:dayId" element={<Test />} />
-        <Route path="review" element={<Review />} />
-      </Route>
-    </Routes>
+    <MotionConfig reducedMotion="user">
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="study/:dayId" element={<Study />} />
+          <Route path="test/:dayId" element={<Test />} />
+          <Route path="review" element={<Review />} />
+        </Route>
+      </Routes>
+    </MotionConfig>
   );
 }
 

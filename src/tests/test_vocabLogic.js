@@ -9,7 +9,7 @@ function test(name, input, expected) {
         const result = parseAnswerList(input);
         assert.deepStrictEqual(result, expected);
         console.log(`✅ Passed: ${name}`);
-    } catch (error) {
+    } catch {
         console.error(`❌ Failed: ${name}`);
         console.error(`   Input: ${JSON.stringify(input)}`);
         console.error(`   Expected: ${JSON.stringify(expected)}`);

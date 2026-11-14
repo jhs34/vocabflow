@@ -5,11 +5,11 @@
   "type": "module",
   "homepage": "https://jhs34.github.io/vocabflow/",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0 --port 3000",
     "build": "vite build",
     "lint": "eslint .",
-    "test": "node test/checkAnswer.test.js",
-    "preview": "vite preview",
+    "test": "node --test tests/vocabLogic.test.js && node test/checkAnswer.test.js && node src/tests/test_vocabLogic.js",
+    "preview": "vite preview --host 0.0.0.0 --port 3000",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist"
   },

@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { Check, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { EASE_OUT, FLUID_SPRING, TACTILE_SPRING, CARD_GLIDE_SPRING } from '../utils/motion';
 
 export default function TestCard({
     word,
@@ -11,25 +12,15 @@ export default function TestCard({
     onNext,
     isLastQuestion
 }) {
-    // Focus management for the card
     const inputRef = useRef(null);
     const nextButtonRef = useRef(null);
 
-    // Focus input on mount (new card)
-    useEffect(() => {
-        if (!feedback && inputRef.current) {
-            inputRef.current.focus();
-        }
-    }, []);
-
-    // Also ensure focus when feedback is cleared (if component persists)
     useEffect(() => {
         if (!feedback && inputRef.current) {
             inputRef.current.focus();
         }
     }, [feedback]);
 
-    // Focus next button when feedback appears
     useEffect(() => {
         if (feedback && nextButtonRef.current) {
             nextButtonRef.current.focus();
@@ -38,115 +29,188 @@ export default function TestCard({
 
     return (
         <motion.div
-            initial={{ opacity: 0, x: 50, filter: 'blur(10px)' }}
-            animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+            layout
+            initial={{ opacity: 0, x: 44, scale: 0.985, zIndex: 1 }}
+            animate={
+                feedback === 'correct'
+                    ? { opacity: 1, x: 0, scale: [1, 1.014, 1], zIndex: 1 }
+                    : { opacity: 1, x: 0, scale: 1, zIndex: 1 }
+            }
             exit={{
                 opacity: 0,
-                x: -50,
-                filter: 'blur(10px)',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                width: '100%',
-                zIndex: 0
+                x: -44,
+                scale: 0.98,
+                zIndex: 0,
+                pointerEvents: 'none',
+                transition: {
+                    x: CARD_GLIDE_SPRING,
+                    scale: CARD_GLIDE_SPRING,
+                    opacity: { duration: 0.2, ease: EASE_OUT },
+                },
             }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="glass-panel-gradient"
+            transition={{
+                layout: FLUID_SPRING,
+                x: CARD_GLIDE_SPRING,
+                scale: feedback === 'correct' ? { duration: 0.34, ease: EASE_OUT } : CARD_GLIDE_SPRING,
+                opacity: { duration: 0.24, ease: EASE_OUT },
+            }}
+            className="surface-card card-glide-item"
             style={{
-                padding: '3rem 2rem',
-                textAlign: 'center',
-                willChange: 'transform, opacity',
-                width: '100%',
-                gridArea: '1 / 1 / 2 / 2'
+                padding: '32px 24px',
+                borderRadius: 'var(--radius-panel)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '28px',
+                boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.04)'
             }}
         >
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '1rem' }}>
-                Translate this word:
-            </p>
-            <h2 className="text-gradient-multi" style={{
-                fontSize: 'clamp(2rem, 8vw, 3rem)',
-                fontWeight: '800',
-                marginBottom: '3rem',
-                wordBreak: 'break-word',
-                overflowWrap: 'anywhere',
-                lineHeight: 1.2
-            }}>
-                {word.word}
-            </h2>
+            <motion.div layout="position" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span className="mono" style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                    #{String(word.id).padStart(2, '0')} · 한글 뜻 입력
+                </span>
+                <h2 style={{
+                    fontSize: 'clamp(30px, 6vw, 42px)',
+                    fontWeight: 500,
+                    letterSpacing: '-0.025em',
+                    lineHeight: 1.15,
+                    color: 'var(--text-primary)',
+                    wordBreak: 'break-word'
+                }}>
+                    {word.word}
+                </h2>
+            </motion.div>
 
-            <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '400px', margin: '0 auto' }}>
-                <input
-                    ref={inputRef}
-                    type="text"
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    disabled={feedback !== null}
-                    placeholder="Type meaning (Korean)"
-                    style={{
-                        textAlign: 'center',
-                        fontSize: '1.3rem',
-                        padding: '1rem',
-                        borderRadius: '16px',
-                        background: 'rgba(0,0,0,0.3)',
-                        borderColor: feedback === 'correct' ? 'var(--success)' : feedback === 'incorrect' ? 'var(--error)' : 'rgba(255,255,255,0.1)',
-                        boxShadow: feedback ? `0 0 20px ${feedback === 'correct' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}` : 'none',
-                        transition: 'all 0.3s'
-                    }}
-                    autoComplete="off"
-                    autoCorrect="off"
-                    autoCapitalize="off"
-                    spellCheck="false"
-                    name="vocab-test-input-no-autofill"
-                    data-lpignore="true"
-                    data-form-type="other"
-                    data-1p-ignore="true"
-                    enterKeyHint="done"
-                    inputMode="text"
-                />
+            <motion.form
+                layout="position"
+                onSubmit={onSubmit}
+                style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '12px',
+                    maxWidth: '400px',
+                    width: '100%',
+                    margin: '0 auto'
+                }}
+            >
+                <motion.div
+                    layout="position"
+                    animate={
+                        feedback === 'incorrect'
+                            ? { x: [0, -8, 8, -5, 4, -2, 0] }
+                            : { x: 0 }
+                    }
+                    transition={{ duration: 0.42, ease: EASE_OUT }}
+                >
+                    <input
+                        ref={inputRef}
+                        type="text"
+                        className="input-field"
+                        value={userInput}
+                        onChange={(e) => setUserInput(e.target.value)}
+                        disabled={feedback !== null}
+                        placeholder="한글 뜻 입력"
+                        aria-label={`${word.word}의 한글 뜻 입력`}
+                        style={{
+                            height: '44px',
+                            textAlign: 'center',
+                            fontSize: '16px',
+                            borderColor: feedback === 'correct'
+                                ? 'rgba(76, 195, 138, 0.45)'
+                                : feedback === 'incorrect'
+                                    ? 'rgba(229, 72, 77, 0.45)'
+                                    : 'var(--border)'
+                        }}
+                        autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck="false"
+                        name="vocab-test-input-no-autofill"
+                        data-lpignore="true"
+                        data-form-type="other"
+                        data-1p-ignore="true"
+                        enterKeyHint="done"
+                        inputMode="text"
+                    />
+                </motion.div>
 
-                {feedback === null ? (
-                    <button type="submit" className="btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}>
-                        Submit Answer
-                    </button>
-                ) : (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
-                    >
-                        {feedback === 'correct' ? (
-                            <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                                <div style={{ color: 'var(--success)', fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                    <CheckCircle /> Correct!
-                                </div>
-                                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>
-                                    Answer: <span style={{ color: 'white' }}>{word.answer_list[0]}</span>
-                                    {word.answer_list.length > 1 && <span style={{ fontSize: '0.9em', opacity: 0.8 }}> (also: {word.answer_list.slice(1).join(', ')})</span>}
-                                </p>
-                            </div>
-                        ) : (
-                            <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                                <div style={{ color: 'var(--error)', fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
-                                    <XCircle /> Incorrect
-                                </div>
-                                <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
-                                    Answer: <span style={{ color: 'white', fontWeight: 'bold' }}>{word.answer_list[0]}</span>
-                                    {word.answer_list.length > 1 && <span style={{ fontSize: '0.8em' }}> (also: {word.answer_list.slice(1).join(', ')})</span>}
-                                </p>
-                            </div>
-                        )}
-                        <button
-                            ref={nextButtonRef}
-                            type="button"
+                <AnimatePresence mode="popLayout" initial={false}>
+                    {feedback === null ? (
+                        <motion.button
+                            key="submit-btn"
+                            layout="position"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.18, ease: EASE_OUT }}
+                            type="submit"
                             className="btn-primary"
-                            onClick={onNext}
-                            style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}
+                            style={{ width: '100%', height: '44px' }}
                         >
-                            {isLastQuestion ? 'Finish Test' : 'Next Question'}
-                        </button>
-                    </motion.div>
-                )}
-            </form>
+                            <span>정답 확인</span>
+                            <kbd className="keycap hide-mobile" style={{ backgroundColor: 'rgba(22, 21, 19, 0.12)', color: 'var(--bg-page)', borderColor: 'rgba(22, 21, 19, 0.2)' }}>
+                                Enter
+                            </kbd>
+                        </motion.button>
+                    ) : (
+                        <motion.div
+                            key="feedback-panel"
+                            layout="position"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.26, ease: EASE_OUT }}
+                            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+                        >
+                            <div style={{
+                                padding: '12px 16px',
+                                borderRadius: 'var(--radius-control)',
+                                backgroundColor: feedback === 'correct' ? 'var(--success-soft)' : 'var(--error-soft)',
+                                border: `1px solid ${feedback === 'correct' ? 'rgba(76, 195, 138, 0.28)' : 'rgba(229, 72, 77, 0.28)'}`,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '4px',
+                                textAlign: 'left'
+                            }}>
+                                <div style={{
+                                    color: feedback === 'correct' ? 'var(--success)' : 'var(--error)',
+                                    fontWeight: 500,
+                                    fontSize: '14px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px'
+                                }}>
+                                    <motion.span
+                                        initial={{ scale: 0.65, opacity: 0 }}
+                                        animate={{ scale: 1, opacity: 1 }}
+                                        transition={TACTILE_SPRING}
+                                        style={{ display: 'inline-flex' }}
+                                    >
+                                        {feedback === 'correct' ? <Check size={16} strokeWidth={1.5} /> : <X size={16} strokeWidth={1.5} />}
+                                    </motion.span>
+                                    <span>{feedback === 'correct' ? '정답' : '오답'}</span>
+                                </div>
+                                <div style={{ fontSize: '13px', color: 'var(--text-secondary)', wordBreak: 'keep-all' }}>
+                                    <span style={{ color: 'var(--text-muted)' }}>허용 답안 · </span>
+                                    <span style={{ color: 'var(--text-primary)' }}>{word.answer_list.join(' · ')}</span>
+                                </div>
+                            </div>
+
+                            <button
+                                ref={nextButtonRef}
+                                type="button"
+                                className="btn-primary"
+                                onClick={onNext}
+                                style={{ width: '100%', height: '44px' }}
+                            >
+                                <span>{isLastQuestion ? '결과 보기' : '다음 문제'}</span>
+                                <kbd className="keycap hide-mobile" style={{ backgroundColor: 'rgba(22, 21, 19, 0.12)', color: 'var(--bg-page)', borderColor: 'rgba(22, 21, 19, 0.2)' }}>
+                                    Enter
+                                </kbd>
+                            </button>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </motion.form>
         </motion.div>
     );
 }

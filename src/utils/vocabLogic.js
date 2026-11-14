@@ -103,6 +103,54 @@ export function safeParseJSON(jsonString, defaultValue = []) {
     }
 }
 
+export function getStoredBookmarks() {
+    if (typeof localStorage === 'undefined') return [];
+    return safeParseJSON(localStorage.getItem('vocab_bookmarks'), []);
+}
+
+export function saveStoredBookmarks(bookmarks) {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem('vocab_bookmarks', JSON.stringify(bookmarks));
+    if (typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('bookmarks-updated'));
+    }
+}
+
+const lessonCache = new Map();
+
+/**
+ * AI Studio 루트('/') 및 GitHub Pages 서브패스('/vocabflow/', './') 모두에서 안전하게 동작하는 기본 경로 반환
+ */
+export function getBaseUrl() {
+    const envBase = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL)
+        ? import.meta.env.BASE_URL
+        : './';
+
+    if (envBase === './' || envBase === '.' || envBase.startsWith('..')) {
+        return './';
+    }
+    return envBase.endsWith('/') ? envBase : `${envBase}/`;
+}
+
+async function fetchRawDayWords(dayId) {
+    const key = Number(dayId);
+    if (lessonCache.has(key)) {
+        return lessonCache.get(key);
+    }
+
+    const baseUrl = getBaseUrl();
+    const response = await fetch(`${baseUrl}words/day${key}.json`);
+    if (!response.ok) {
+        return null;
+    }
+    const data = await response.json();
+    if (Array.isArray(data) && data.length > 0) {
+        lessonCache.set(key, data);
+        return data;
+    }
+    return [];
+}
+
 export async function fetchLessonData(dayId) {
     // Validate dayId to prevent path traversal
     if (!/^\d+$/.test(String(dayId))) {
@@ -111,13 +159,11 @@ export async function fetchLessonData(dayId) {
     }
 
     try {
-        const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
-        const response = await fetch(`${baseUrl}words/day${dayId}.json`);
-        if (!response.ok) {
+        const data = await fetchRawDayWords(dayId);
+        if (!data || data.length === 0) {
             console.warn(`Failed to fetch day${dayId}.json`);
             return [];
         }
-        const data = await response.json();
         return processWordData(data);
     } catch (error) {
         console.error("Error fetching lesson data:", error);
@@ -127,7 +173,6 @@ export async function fetchLessonData(dayId) {
 
 // 가용 Day 목록을 스캔하는 함수
 export async function getAvailableDays(maxDays = 50) {
-    const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
     const available = [];
 
     // 배치 처리를 통해 브라우저 요청 제한(보통 6개)을 우회하고 안정적으로 가져옵니다.
@@ -137,16 +182,8 @@ export async function getAvailableDays(maxDays = 50) {
         const batchPromises = [];
         for (let j = i; j < i + batchSize && j <= maxDays; j++) {
             batchPromises.push(
-                fetch(`${baseUrl}words/day${j}.json`)
-                    .then(async res => {
-                        if (!res.ok) return null;
-                        try {
-                            const json = await res.json();
-                            return Array.isArray(json) && json.length > 0 ? j : null;
-                        } catch {
-                            return null;
-                        }
-                    })
+                fetchRawDayWords(j)
+                    .then(data => (Array.isArray(data) && data.length > 0 ? j : null))
                     .catch(() => null)
             );
         }
@@ -161,27 +198,22 @@ export async function getAvailableDays(maxDays = 50) {
 }
 
 // 전체 단어 검색 함수
-export async function searchAllWords(query) {
+export async function searchAllWords(query, existingDays = null) {
     if (!query) return [];
     const lowerQuery = query.toLowerCase();
 
-    // 1. 가용 가능한 모든 날짜를 먼저 확인 (캐싱된 목록이 있다면 좋겠지만, 여기선 간단히 스캔)
-    // 성능을 위해 일단 최대 50일 정도만 검색하거나, getAvailableDays 결과를 활용해야 함.
-    // 여기서는 사용자가 검색 버튼을 누르면 getAvailableDays를 먼저 호출한다고 가정하거나,
-    // 직접 1~60 정도를 찔러봅니다.
-    const days = await getAvailableDays(50);
+    const days = Array.isArray(existingDays) && existingDays.length > 0
+        ? existingDays
+        : await getAvailableDays(50);
 
     const results = [];
-    const baseUrl = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`;
 
-    // 병렬로 모든 파일 fetch
+    // 병렬로 모든 파일 조회 (캐시 활용)
     await Promise.all(days.map(async (day) => {
         try {
-            const res = await fetch(`${baseUrl}words/day${day}.json`);
-            if (!res.ok) return;
-            const data = await res.json();
+            const data = await fetchRawDayWords(day);
+            if (!data || data.length === 0) return;
 
-            // 단어 검색
             data.forEach(item => {
                 if (item.word.toLowerCase().includes(lowerQuery) ||
                     item.raw_meaning.includes(query)) {
