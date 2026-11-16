@@ -343,11 +343,9 @@ export default function Home() {
                         return (
                             <motion.div
                                 key={day}
-                                layout="position"
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{
-                                    layout: FLUID_SPRING,
                                     opacity: { duration: 0.3, ease: EASE_OUT, delay: getStaggerDelay(index) },
                                     y: { duration: 0.32, ease: EASE_OUT, delay: getStaggerDelay(index) },
                                 }}

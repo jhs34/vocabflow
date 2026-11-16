@@ -13,30 +13,42 @@ export default function Layout() {
 
     useEffect(() => {
         function onFullscreenChange() {
-            setIsFullScreen(Boolean(document.fullscreenElement));
+            const active = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+            setIsFullScreen(active);
+            document.documentElement.classList.toggle('is-fullscreen', active);
         }
 
         function syncBookmarks() {
             setBookmarkCount(getStoredBookmarks().length);
         }
 
+        onFullscreenChange();
         document.addEventListener('fullscreenchange', onFullscreenChange);
+        document.addEventListener('webkitfullscreenchange', onFullscreenChange);
         window.addEventListener('bookmarks-updated', syncBookmarks);
         window.addEventListener('storage', syncBookmarks);
         return () => {
             document.removeEventListener('fullscreenchange', onFullscreenChange);
+            document.removeEventListener('webkitfullscreenchange', onFullscreenChange);
             window.removeEventListener('bookmarks-updated', syncBookmarks);
             window.removeEventListener('storage', syncBookmarks);
+            document.documentElement.classList.remove('is-fullscreen');
         };
     }, []);
 
     const toggleFullScreen = () => {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch((e) => {
-                console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
-            });
+        const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
+        if (!fsElement) {
+            const req = document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen;
+            if (req) {
+                Promise.resolve(req.call(document.documentElement)).catch((e) => {
+                    console.error(`Error attempting to enable full-screen mode: ${e.message} (${e.name})`);
+                });
+            }
         } else if (document.exitFullscreen) {
             document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
         }
     };
 
@@ -74,14 +86,14 @@ export default function Layout() {
                         </Link>
                         <Link to="/review" className={`nav-link ${isReviewActive ? 'is-active' : ''}`}>
                             <span>북마크 노트</span>
-                            <AnimatePresence mode="popLayout" initial={false}>
+                            <AnimatePresence mode="wait" initial={false}>
                                 {bookmarkCount > 0 && (
                                     <motion.span
                                         key={bookmarkCount}
-                                        initial={{ opacity: 0, y: -6 }}
+                                        initial={{ opacity: 0, y: -4 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 6 }}
-                                        transition={{ duration: 0.24, ease: EASE_OUT }}
+                                        exit={{ opacity: 0, y: 4 }}
+                                        transition={{ duration: 0.16, ease: EASE_OUT }}
                                         className="mono"
                                         style={{ color: 'var(--text-muted)', fontSize: '12px' }}
                                     >

@@ -374,7 +374,7 @@ export default function Study() {
                                                     setIsFlipped(true);
                                                 }
                                             }}
-                                            className="surface-card is-interactive flip-card-face"
+                                            className={`surface-card is-interactive flip-card-face ${shouldReduceMotion ? '' : 'flip-card-front'}`}
                                             style={{
                                                 pointerEvents: isFlipped ? 'none' : 'auto',
                                                 opacity: shouldReduceMotion && isFlipped ? 0 : 1,
@@ -565,7 +565,7 @@ export default function Study() {
                                         color: 'var(--text-secondary)',
                                         fontSize: '14px',
                                         opacity: isWordHidden ? 0 : 1,
-                                        filter: isWordHidden ? 'blur(4px)' : 'blur(0px)',
+                                        filter: isWordHidden ? 'blur(4px)' : 'none',
                                         transform: isWordHidden ? 'translateY(3px)' : 'translateY(0)',
                                         transition: 'opacity 240ms var(--ease-out), transform 240ms var(--ease-out), filter 240ms var(--ease-out)',
                                         textAlign: 'right',
