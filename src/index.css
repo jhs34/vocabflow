@@ -34,8 +34,8 @@
   --error-soft: rgba(229, 72, 77, 0.12);
 
   /* Typography */
-  --font-main: "Google Sans Flex", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-main: "Google Sans Flex", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-mono: "IBM Plex Mono", "Noto Sans KR", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Nested Radius Scale */
   --radius-sm: 4px;
@@ -83,6 +83,7 @@ body {
   font-family: var(--font-main);
   font-optical-sizing: auto;
   font-weight: 400;
+  font-style: normal;
   font-size: 15px;
   line-height: 1.5;
   letter-spacing: 0.005em;
@@ -150,6 +151,8 @@ h3 {
 
 .mono {
   font-family: var(--font-mono);
+  font-optical-sizing: auto;
+  font-style: normal;
   font-variant-numeric: tabular-nums;
 }
 
